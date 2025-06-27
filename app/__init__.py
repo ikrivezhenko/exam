@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -45,6 +45,10 @@ def create_app():
     # Регистрация blueprint
     from .routes import routes as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    @app.errorhandler(404)
+    def forbidden(e):
+        return render_template('404.html')
 
     # Создание таблиц
     with app.app_context():

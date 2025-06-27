@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import render_template, redirect, url_for, flash, request, send_file, abort, Blueprint, current_app
+from flask import render_template, redirect, send_from_directory, url_for, flash, request, send_file, abort, Blueprint, current_app
 from flask_login import login_user, logout_user, current_user, login_required
 from . import db, bcrypt
 from .models import (User, Program, ExamDate, CommissionMember, Applicant, 
@@ -64,6 +64,14 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('routes.login'))
+
+@routes.route('/static/cat.png')
+def serve_cat():
+    try:
+        # Путь относительно папки app
+        return send_from_directory('static/img', 'cat.png')
+    except FileNotFoundError:
+        abort(404)
 
 # Дашборд администратора
 @routes.route('/admin')
