@@ -9,6 +9,11 @@ from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
+def translate_date_to_ru(date: str) -> str:
+    date = date.replace("May", "Мая").replace("June", "Июня").replace("July", "Июля").replace("August", "Августа")
+    return date
+
+
 def replace_placeholder(doc, placeholder, replacement):
     """Заменяет плейсхолдер во всех элементах документа"""
     # В параграфах
@@ -59,12 +64,12 @@ def generate_protocol(applicant, exam_date):
 
     replacements = {
         '{chairman}': chairman.user.full_name if chairman else '',
-        '{date}': exam_date.date.strftime('«%d» %B %Y г.'),
+        '{date}': translate_date_to_ru(exam_date.date.strftime('«%d» %B %Yг.')),
         '{program_code}': exam_date.program.code,
         '{program_name}': exam_date.program.name,
         '{applicant_name}': applicant.full_name
     }
-
+    print(replacements)
     # Универсальная замена во всех элементах документа
     for placeholder, value in replacements.items():
         replace_placeholder(doc, placeholder, value)
@@ -100,9 +105,9 @@ def generate_protocol(applicant, exam_date):
             # Ширина колонок: 70% и 30%
             tblGrid = OxmlElement('w:tblGrid')
             col1 = OxmlElement('w:gridCol')
-            col1.set(qn('w:w'), "3500")  # 70% от 5000
+            col1.set(qn('w:w'), "3500")  # 10%
             col2 = OxmlElement('w:gridCol')
-            col2.set(qn('w:w'), "1500")  # 30% от 5000
+            col2.set(qn('w:w'), "1500")  # 80%
             tblGrid.append(col1)
             tblGrid.append(col2)
             tbl.append(tblGrid)
@@ -118,14 +123,13 @@ def generate_protocol(applicant, exam_date):
                 r = OxmlElement('w:r')
                 rPr = OxmlElement('w:rPr')
 
-                # Шрифт Arial 11pt
                 rFonts = OxmlElement('w:rFonts')
                 rFonts.set(qn('w:ascii'), 'Arial')
                 rFonts.set(qn('w:hAnsi'), 'Arial')
                 rPr.append(rFonts)
 
                 sz = OxmlElement('w:sz')
-                sz.set(qn('w:val'), "22")  # 11pt * 2 = 22
+                sz.set(qn('w:val'), "22")
                 rPr.append(sz)
 
                 r.append(rPr)
@@ -136,27 +140,19 @@ def generate_protocol(applicant, exam_date):
                 tc.append(p_elem)
                 tr.append(tc)
             tbl.append(tr)
-
+            #
             # Добавляем данные
             for member in exam_date.commission:
                 tr = OxmlElement('w:tr')
 
-                # ФИО
                 tc = OxmlElement('w:tc')
                 tcPr = OxmlElement('w:tcPr')
-
-                # Явное задание границ для ячейки
-                tcBorders = OxmlElement('w:tcBorders')
-                for border_name in ['top', 'left', 'bottom', 'right']:
-                    border = OxmlElement(f'w:{border_name}')
-                    border.set(qn('w:val'), 'single')
-                    border.set(qn('w:sz'), '4')
-                    border.set(qn('w:space'), '0')
-                    border.set(qn('w:color'), '000000')
-                tcPr.append(tcBorders)
                 tc.append(tcPr)
 
-                # Шрифт Arial 11pt
+                p_elem = OxmlElement('w:p')
+                r = OxmlElement('w:r')
+                rPr = OxmlElement('w:rPr')
+
                 rFonts = OxmlElement('w:rFonts')
                 rFonts.set(qn('w:ascii'), 'Arial')
                 rFonts.set(qn('w:hAnsi'), 'Arial')
@@ -173,8 +169,6 @@ def generate_protocol(applicant, exam_date):
                 p_elem.append(r)
                 tc.append(p_elem)
                 tr.append(tc)
-
-                # Роль
                 tc = OxmlElement('w:tc')
                 tcPr = OxmlElement('w:tcPr')
                 tc.append(tcPr)
@@ -194,16 +188,11 @@ def generate_protocol(applicant, exam_date):
 
                 r.append(rPr)
                 t = OxmlElement('w:t')
-
-                # Форматируем роль для отображения
-                role = format_role(member.role)
-                t.text = role
-
+                t.text = format_role(member.role)
                 r.append(t)
                 p_elem.append(r)
                 tc.append(p_elem)
                 tr.append(tc)
-
                 tbl.append(tr)
 
 
