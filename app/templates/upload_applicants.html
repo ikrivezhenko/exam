@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+  <h2>Загрузка таблицы абитуриентов</h2>
+  <form method="POST" enctype="multipart/form-data" class="mb-4">
+    <input type="file" name="file" accept=".csv,.xlsx" class="form-control mb-3" required>
+    <button class="btn btn-primary">Загрузить</button>
+  </form>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ 'danger' if cat=='error' else cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+</div>
+{% endblock %}

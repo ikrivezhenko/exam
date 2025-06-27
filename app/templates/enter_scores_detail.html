@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="spacer-lg">
+    <h1>Выставление баллов для: {{ applicant.full_name }}</h1>
+
+    <div class="row spacer-lg">
+        <div class="col-lg-6">
+            <div class="card-elegant">
+                <div class="card-header-elegant">
+                    <h2><i class="bi bi-info-circle"></i> Информация</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="fw-bold">Программа:</span>
+                            <span>{{ applicant.program.code }} {{ applicant.program.name }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="fw-bold">Дата экзамена:</span>
+                            <span>{{ applicant.exam_date.date.strftime('%d.%m.%Y') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="fw-bold">Общий балл:</span>
+                            <span class="badge bg-primary fs-5">
+                                {{ applicant.scores | sum(attribute='score') }}/100
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card-elegant mt-4">
+                <div class="card-header-elegant">
+                    <h2><i class="bi bi-plus-circle"></i> Добавить оценку</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-4">
+                            {{ form.question_id.label(class="form-label fw-bold") }}
+                            {{ form.question_id(class="form-control-elegant form-select") }}
+                        </div>
+                        <div class="mb-4">
+                            {{ form.score.label(class="form-label fw-bold") }}
+                            {{ form.score(class="form-control-elegant") }}
+                        </div>
+                        <button type="submit" class="btn btn-primary-elegant w-100">
+                            <i class="bi bi-plus-lg"></i> Добавить оценку
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card-elegant">
+                <div class="card-header-elegant">
+                    <h2><i class="bi bi-list-check"></i> Текущие оценки</h2>
+                </div>
+                <div class="card-body">
+                    {% if applicant.scores %}
+                    <div class="table-responsive">
+                        <table class="elegant-table">
+                            <thead>
+                                <tr>
+                                    <th>Вопрос</th>
+                                    <th width="120px">Балл</th>
+                                    <th width="150px">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for score in applicant.scores %}
+                                <tr>
+                                    <td>{{ score.question.text }}</td>
+                                    <td>
+                                        <span class="badge bg-primary fs-6">{{ score.score }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('routes.edit_score', score_id=score.id) }}"
+                                               class="btn btn-outline-elegant btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form action="{{ url_for('routes.delete_score', score_id=score.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-outline-elegant btn-sm"
+                                                        onclick="return confirm('Вы уверены?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light text-center">
+                        <i class="bi bi-info-circle"></i> Нет оценок
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

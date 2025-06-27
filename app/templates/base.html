@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система оценки вступительных испытаний</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        :root {
+            --primary: #2e7d32;       /* основной зеленый */
+            --primary-dark: #1b5e20;
+            --primary-light: #4caf50;
+            --accent: #ff9800;        /* акцентный оранжевый */
+            --light-bg: #f8f9fa;      /* светлый фон */
+            --card-bg: #ffffff;       /* фон карточек */
+            --dark-text: #212529;     /* темный текст */
+            --light-text: #f8f9fa;    /* светлый текст */
+            --border: #e0e0e0;        /* цвет границ */
+            --success: #4caf50;       /* успех */
+            --info: #2196f3;          /* информация */
+            --warning: #ff9800;       /* предупреждение */
+            --danger: #f44336;        /* ошибка */
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.7;
+            padding-top: 0;
+        }
+
+        /* Header */
+        .main-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.8rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            margin-right: 12px;
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .user-role {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        /* Кнопки с обводкой */
+        .outline-btn {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .outline-btn:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .outline-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            border: none;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .content-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            margin-bottom: 2rem;
+        }
+
+        .flash {
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: none;
+        }
+
+        .flash-success {
+            background-color: #e8f5e9;
+            color: var(--success);
+        }
+
+        .flash-error {
+            background-color: #ffebee;
+            color: var(--danger);
+        }
+
+        .flash i {
+            font-size: 1.8rem;
+        }
+
+        /* Footer */
+        .main-footer {
+            background-color: var(--primary-dark);
+            color: rgba(255, 255, 255, 0.85);
+            padding: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5 {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            position: relative;
+            padding-bottom: 1.2rem;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            padding-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1.6rem;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        /* Таблицы */
+        .elegant-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin: 2rem 0;
+        }
+
+        .elegant-table thead {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .elegant-table th {
+            padding: 1.2rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .elegant-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .elegant-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .elegant-table tbody tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .elegant-table tbody tr:hover {
+            background-color: rgba(46, 125, 50, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .elegant-table td {
+            padding: 1.2rem 1.5rem;
+            color: #444;
+        }
+
+        /* Кнопки */
+        .btn-elegant {
+            border-radius: 30px;
+            padding: 10px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary-elegant {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary-elegant:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-outline-elegant {
+            background: transparent;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline-elegant:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-danger-elegant {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger-elegant:hover {
+            background: #d32f2f;
+            border-color: #d32f2f;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        /* Формы */
+        .form-control-elegant {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-elegant:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+        }
+
+        /* Utilities */
+        .spacer-lg {
+            margin-bottom: 3rem;
+        }
+
+        .spacer-md {
+            margin-bottom: 2rem;
+        }
+
+        .spacer-sm {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .header-container {
+                padding: 0 1.5rem;
+            }
+
+            .main-content {
+                padding: 0 1.5rem;
+            }
+
+            .content-card {
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo span {
+                font-size: 1.4rem;
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: 1.2rem;
+                text-align: center;
+                padding: 1rem;
+            }
+
+            .user-info {
+                text-align: center;
+            }
+
+            .main-content {
+                padding: 0 1rem;
+                margin: 2rem auto;
+            }
+
+            .content-card {
+                padding: 1.8rem 1.5rem;
+                border-radius: 14px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <a class="logo">
+                <i class="bi bi-journal-check"></i>
+                <span>Система оценки вступительных испытаний</span>
+            </a>
+
+            <nav class="user-nav">
+                {% if current_user.is_authenticated %}
+                <div class="user-info">
+                    <div class="user-name">{{ current_user.full_name }}</div>
+                    <div class="user-role">{{ current_user.role }}</div>
+                </div>
+                <a href="{{ url_for('routes.logout') }}" class="outline-btn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Выйти</span>
+                </a>
+                {% else %}
+                <a href="{{ url_for('routes.login') }}" class="outline-btn">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Войти</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">
+                        <i class="bi bi-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="content-card">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            &copy; 2025 Система оценки вступительных испытаний
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Кастомные скрипты -->
+    <script>
+        // Инициализация компонентов Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            // Анимация элементов при загрузке
+            document.querySelectorAll('.content-card, .flash').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            });
+
+            setTimeout(() => {
+                document.querySelectorAll('.content-card, .flash').forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                });
+            }, 100);
+
+            // Плавная прокрутка
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

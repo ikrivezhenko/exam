@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="spacer-lg">
+    <h1>Управление стандартными комиссиями</h1>
+    <p class="lead">Настройка стандартного состава комиссии для каждой программы</p>
+
+    <div class="card-elegant mb-5">
+        <div class="card-header-elegant">
+            <h2><i class="bi bi-person-plus"></i> Добавить члена комиссии</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="form-floating">
+                            {{ form.program_id(class="form-control-elegant form-select") }}
+                            <label>Образовательная программа</label>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-floating">
+                            {{ form.user_id(class="form-control-elegant form-select") }}
+                            <label>Член комиссии</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating">
+                            {{ form.role(class="form-control-elegant form-select") }}
+                            <label>Роль</label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary-elegant w-100 mt-4">
+                    <i class="bi bi-plus-circle"></i> Добавить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card-elegant">
+        <div class="card-header-elegant">
+            <h2><i class="bi bi-list-stars"></i> Текущие стандартные комиссии</h2>
+        </div>
+        <div class="card-body">
+            {% if commissions %}
+            <div class="table-responsive">
+                <table class="elegant-table">
+                    <thead>
+                        <tr>
+                            <th>Программа</th>
+                            <th>Член комиссии</th>
+                            <th>Должность</th>
+                            <th class="text-end">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for commission in commissions %}
+                        <tr>
+                            <td>
+                                <strong>{{ commission.program.code }}</strong>
+                                {{ commission.program.name }}
+                            </td>
+                            <td class="fw-bold">{{ commission.user.full_name }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ commission.role }}</span>
+                            </td>
+                            <td class="text-end">
+                                <form action="{{ url_for('routes.delete_standard_commission', commission_id=commission.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-outline-elegant btn-sm"
+                                            onclick="return confirm('Вы уверены?')">
+                                        <i class="bi bi-trash"></i> Удалить
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-light text-center">
+                <i class="bi bi-info-circle"></i> Нет данных о стандартных комиссиях
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

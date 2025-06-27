@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="spacer-lg">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card-elegant">
+                <div class="card-header-elegant text-center">
+                    <h1><i class="bi bi-pencil-square"></i> Редактирование оценки</h1>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light text-center mb-4">
+                        <p class="mb-1"><strong>Абитуриент:</strong> {{ score.applicant.full_name }}</p>
+                        <p class="mb-0"><strong>Вопрос:</strong> {{ score.question.text }}</p>
+                    </div>
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Балл</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">От 0 до 100</span>
+                                {{ form.score(class="form-control-elegant") }}
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('routes.applicant_scores', applicant_id=score.applicant.id) }}"
+                               class="btn btn-outline-elegant me-md-2">
+                                <i class="bi bi-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary-elegant">
+                                <i class="bi bi-check-circle"></i> Сохранить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

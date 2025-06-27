@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="spacer-lg">
+    <h1>Назначение абитуриентов на {{ exam_date.date.strftime('%d.%m.%Y') }}</h1>
+    <p class="lead">Программа: <strong>{{ exam_date.program.code }} {{ exam_date.program.name }}</strong></p>
+
+    <div class="card-elegant">
+        <div class="card-header-elegant">
+            <h2><i class="bi bi-person-plus"></i> Абитуриенты без назначенной даты экзамена</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% if applicants %}
+                <div class="table-responsive">
+                    <table class="elegant-table">
+                        <thead>
+                            <tr>
+                                <th width="50px">Выбрать</th>
+                                <th>ФИО</th>
+                                <th>Программа</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for applicant in applicants %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="applicant_ids" value="{{ applicant.id }}">
+                                    </div>
+                                </td>
+                                <td>{{ applicant.full_name }}</td>
+                                <td>{{ applicant.program.code }} {{ applicant.program.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-primary-elegant mt-4 w-100">
+                    <i class="bi bi-calendar-check"></i> Назначить выбранных
+                </button>
+                {% else %}
+                <div class="alert alert-light text-center">
+                    <i class="bi bi-check-circle"></i> Нет доступных абитуриентов для назначения
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

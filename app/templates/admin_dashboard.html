@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header mb-5">
+        <h1 class="mb-3"><i class="bi bi-speedometer2 me-3"></i>Панель администратора</h1>
+        <p class="lead text-muted">Управление системой экзаменов и абитуриентами</p>
+    </div>
+
+    <div class="dashboard-cards row g-4">
+        <!-- Карточка Программы -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.programs') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-journal-bookmark fs-1 me-3"></i>
+                        <h3 class="mb-0">Программы</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Управление образовательными программами, добавление, редактирование и удаление программ обучения.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка Даты экзаменов -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.exam_dates') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-calendar-event fs-1 me-3"></i>
+                        <h3 class="mb-0">Даты экзаменов</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Управление расписанием экзаменов, назначение комиссий и отслеживание предстоящих событий.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка Абитуриенты -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.applicants') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-people fs-1 me-3"></i>
+                        <h3 class="mb-0">Абитуриенты</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Добавление и управление абитуриентами, назначение на экзамены и просмотр результатов.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка Пользователи -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.users') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-gear fs-1 me-3"></i>
+                        <h3 class="mb-0">Пользователи</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Управление учетными записями администраторов и членов экзаменационных комиссий.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка Стандартные комиссии -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.standard_commission') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-badge fs-1 me-3"></i>
+                        <h3 class="mb-0">Стандартные комиссии</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Управление составом комиссий для различных программ и экзаменационных мероприятий.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка Вопросы -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.questions') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-question-circle fs-1 me-3"></i>
+                        <h3 class="mb-0">Вопросы</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Управление вопросами для программ, создание и редактирование экзаменационных материалов.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Дополнительные стили для панели управления */
+    .dashboard-header {
+        text-align: center;
+        padding: 2rem 0;
+        border-bottom: 3px solid var(--primary);
+        margin-bottom: 2.5rem;
+    }
+
+    .dashboard-header h1 {
+        font-weight: 700;
+        color: var(--primary-dark);
+        padding-bottom: 1rem;
+        position: relative;
+    }
+
+    .dashboard-header h1:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--accent);
+        border-radius: 2px;
+    }
+
+    .dashboard-card {
+        transition: all 0.3s ease;
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: var(--card-bg);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        border-color: rgba(46, 125, 50, 0.2);
+    }
+
+    .dashboard-card .card-header {
+        border-radius: 0 !important;
+        border: none;
+        background: linear-gradient(to right, var(--primary), var(--primary-dark));
+    }
+
+    .dashboard-card .card-header h3 {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .dashboard-card .card-body {
+        background-color: var(--card-bg);
+        flex-grow: 1;
+    }
+
+    .dashboard-card .card-footer {
+        background-color: var(--card-bg);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Анимации для карточек */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .dashboard-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+    }
+
+    .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+    .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+    .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+    .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+    .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+
+    /* Убираем подчеркивание у всех ссылок */
+    .dashboard-card {
+        text-decoration: none !important;
+    }
+
+    /* Иконки в заголовках */
+    .dashboard-card .card-header i {
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.15);
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Кнопки в футере */
+    .dashboard-card .btn-outline-primary {
+        border-width: 2px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card .btn-outline-primary:hover {
+        background-color: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация при наведении на карточки
+        const cards = document.querySelectorAll('.dashboard-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+                this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.12)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.08)';
+            });
+        });
+    });
+</script>
+{% endblock %}
