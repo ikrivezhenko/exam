@@ -414,7 +414,8 @@
 <body>
     <header class="main-header">
         <div class="header-container">
-            <a class="logo">
+            <!-- Изменено: добавлена ссылка на главную страницу -->
+            <a href="{{ url_for('routes.home') }}" class="logo">
                 <i class="bi bi-journal-check"></i>
                 <span>Система оценки вступительных испытаний</span>
             </a>
