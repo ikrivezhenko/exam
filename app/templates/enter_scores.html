@@ -23,32 +23,30 @@
                 <div class="accordion-body">
                     <div class="list-group">
                         {% for applicant in exam_date.applicants %}
-                        <a href="{{ url_for('routes.applicant_scores', applicant_id=applicant.id) }}"
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="mb-1">{{ applicant.full_name }}</h5>
                                 <small>Идентификатор: {{ applicant.id }}</small>
                             </div>
-<!--                            <span class="badge bg-primary rounded-pill">-->
-<!--                                {{ applicant.scores | sum(attribute='score') }} баллов-->
-<!--                            </span>-->
-                            <div>
-                            <a href="{{ url_for('routes.view_protocol', applicant_id=applicant.id) }}"
-                                 class="btn btn-outline-success btn-sm">
-                                <i class="fa fa-download"></i> Протокол
-                              </a>
-                                </div>
-<!--                            <a href="{{ url_for('routes.view_protocol', applicant_id=applicant.id) }}"-->
-<!--                                 class="btn btn-outline-success btn-sm">-->
-<!--                                <i class="fa fa-download"></i> Протокол-->
-<!--                              </a>-->
-                        </a>
+
+                            {% if applicant.exam_date %}
+                            <div class="btn-group">
+                                <a href="{{ url_for('routes.applicant_scores', applicant_id=applicant.id) }}"
+                                   class="btn btn-outline-elegant btn-sm">
+                                    <i class="bi bi-pencil"></i> Баллы
+                                </a>
+                                <a href="{{ url_for('routes.view_protocol', applicant_id=applicant.id) }}"
+                                   class="btn btn-outline-elegant btn-sm ms-1">
+                                    <i class="bi bi-file-earmark-text"></i> Протокол
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
-
         {% endfor %}
     </div>
     {% else %}
@@ -61,21 +59,4 @@
     </div>
     {% endif %}
 </div>
-
-    <div class="container my-4">
-      <h2>Ваши абитуриенты на {{ today_date }}</h2>
-      <ul class="list-group">
-        {% for exam_date in exam_dates %}
-          {% for applicant in exam_date.applicants %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              {{ applicant.full_name }}
-              <a href="{{ url_for('routes.view_protocol', applicant_id=applicant.id) }}"
-                 class="btn btn-outline-success btn-sm">
-                <i class="fa fa-download"></i> Протокол
-              </a>
-            </li>
-          {% endfor %}
-        {% endfor %}
-      </ul>
-    </div>
 {% endblock %}
