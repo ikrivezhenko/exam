@@ -9,7 +9,7 @@ bcrypt = Bcrypt(app)
 def create_admin():
     with app.app_context():
         # Проверяем, нет ли уже администратора
-        admin_exists = User.query.filter_by(username='admin').first()
+        admin_exists = User.query.filter_by(username='admin1').first()
 
         if admin_exists:
             print("Администратор уже существует в системе")

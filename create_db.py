@@ -24,7 +24,7 @@ def create_database():
         hashed_password = '$2b$12$7uWjK6T8d4eX2Z1vQ5yR3eYdSfGhJkLmNpOqRrSsTtUvWxYzAbCdE'
         
         users = [
-            User(username='admin', password=hashed_password, 
+            User(username='admin1', password=hashed_password, 
                  full_name='Иванов Иван Иванович', position='Системный администратор', 
                  role='admin', school_id=None),
                  
