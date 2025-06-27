@@ -1,21 +1,28 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField, IntegerField, TextAreaField
-from wtforms.validators import DataRequired, Length, ValidationError
-from .models import Program, User
+from wtforms.validators import DataRequired, Length, ValidationError, Optional
+from .models import Program, User, EngineeringSchool
 from datetime import date
-
+from flask_wtf.file import FileField, FileRequired
 
 class LoginForm(FlaskForm):
     username = StringField('Логин', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])
     submit = SubmitField('Войти')
 
+class EngineeringSchoolForm(FlaskForm):
+    name = StringField('Название школы', validators=[DataRequired(), Length(min=2, max=100)])
+    submit = SubmitField('Добавить')
 
 class ProgramForm(FlaskForm):
     code = StringField('Код программы', validators=[DataRequired(), Length(min=2, max=50)])
     name = StringField('Название программы', validators=[DataRequired(), Length(min=5, max=200)])
+    school_id = SelectField('Инженерная школа', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Добавить')
 
+    def __init__(self, *args, **kwargs):
+        super(ProgramForm, self).__init__(*args, **kwargs)
+        self.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.all()]
 
 class ExamDateForm(FlaskForm):
     date = DateField('Дата экзамена', format='%Y-%m-%d', validators=[DataRequired()])
@@ -25,7 +32,6 @@ class ExamDateForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(ExamDateForm, self).__init__(*args, **kwargs)
         self.program_id.choices = [(p.id, f"{p.code} {p.name}") for p in Program.query.all()]
-
 
 class AssignCommissionForm(FlaskForm):
     user_id = SelectField('Член комиссии', coerce=int, validators=[DataRequired()])
@@ -38,8 +44,7 @@ class AssignCommissionForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(AssignCommissionForm, self).__init__(*args, **kwargs)
-        self.user_id.choices = [(u.id, u.full_name) for u in User.query.filter_by(role='commission').all()]
-
+        self.user_id.choices = [(u.id, u.full_name) for u in User.query.filter(User.role.in_(['commission', 'secretary', 'admin'])).all()]
 
 class ApplicantForm(FlaskForm):
     full_name = StringField('ФИО', validators=[DataRequired(), Length(min=5, max=200)])
@@ -50,12 +55,10 @@ class ApplicantForm(FlaskForm):
         super(ApplicantForm, self).__init__(*args, **kwargs)
         self.program_id.choices = [(p.id, f"{p.code} {p.name}") for p in Program.query.all()]
 
-
 class ScoreForm(FlaskForm):
     question_id = SelectField('Вопрос', coerce=int, validators=[DataRequired()])
     score = IntegerField('Балл', validators=[DataRequired()])
     submit = SubmitField('Добавить')
-
 
 class UserForm(FlaskForm):
     username = StringField('Логин', validators=[DataRequired(), Length(min=3, max=80)])
@@ -64,10 +67,16 @@ class UserForm(FlaskForm):
     position = StringField('Должность', validators=[DataRequired(), Length(min=3, max=100)])
     role = SelectField('Роль', choices=[
         ('admin', 'Администратор'),
-        ('commission', 'Член комиссии')
+        ('secretary', 'Ответственный секретарь'),
+        ('commission', 'Экзаменатор')
     ], validators=[DataRequired()])
+    school_id = SelectField('Инженерная школа', coerce=int, validators=[Optional()])
     submit = SubmitField('Сохранить')
 
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        self.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.all()]
+        self.school_id.choices.insert(0, (0, '-- Не выбрана --'))
 
 class StandardCommissionForm(FlaskForm):
     program_id = SelectField('Программа', coerce=int, validators=[DataRequired()])
@@ -82,13 +91,11 @@ class StandardCommissionForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(StandardCommissionForm, self).__init__(*args, **kwargs)
         self.program_id.choices = [(p.id, f"{p.code} {p.name}") for p in Program.query.all()]
-        self.user_id.choices = [(u.id, u.full_name) for u in User.query.filter_by(role='commission').all()]
-
+        self.user_id.choices = [(u.id, u.full_name) for u in User.query.filter(User.role.in_(['commission', 'secretary', 'admin'])).all()]
 
 class EditScoreForm(FlaskForm):
     score = IntegerField('Балл', validators=[DataRequired()])
     submit = SubmitField('Обновить')
-
 
 class QuestionForm(FlaskForm):
     text = TextAreaField('Текст вопроса', validators=[DataRequired()])
@@ -99,8 +106,10 @@ class QuestionForm(FlaskForm):
         super(QuestionForm, self).__init__(*args, **kwargs)
         self.program_id.choices = [(p.id, f"{p.code} {p.name}") for p in Program.query.all()]
 
-from flask_wtf.file import FileField, FileRequired
-
 class UploadApplicantsForm(FlaskForm):
     file = FileField('Файл с абитуриентами (CSV или Excel)', validators=[FileRequired()])
+    submit = SubmitField('Загрузить')
+
+class UploadScheduleForm(FlaskForm):
+    file = FileField('Файл с расписанием (CSV или Excel)', validators=[FileRequired()])
     submit = SubmitField('Загрузить')

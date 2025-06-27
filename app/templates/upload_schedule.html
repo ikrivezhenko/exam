@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="spacer-lg">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card-elegant">
+                <div class="card-header-elegant text-center">
+                    <h1><i class="bi bi-upload"></i> Загрузка расписания</h1>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Файл c расписанием</label>
+                            {{ form.file(class="form-control-elegant") }}
+                            <div class="form-text">Поддерживаемые форматы: CSV, XLS, XLSX</div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('routes.home') }}" class="btn btn-outline-elegant me-md-2">
+                                <i class="bi bi-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary-elegant">
+                                <i class="bi bi-upload"></i> Загрузить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

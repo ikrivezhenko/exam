@@ -8,6 +8,24 @@
     </div>
 
     <div class="dashboard-cards row g-4">
+        <!-- Карточка Инженерные школы -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.engineering_schools') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-building fs-1 me-3"></i>
+                        <h3 class="mb-0">Инженерные школы</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Управление инженерными школами, добавление, редактирование и удаление.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+
         <!-- Карточка Программы -->
         <div class="col-lg-4 col-md-6">
             <a href="{{ url_for('routes.programs') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
@@ -112,6 +130,24 @@
                 </div>
                 <div class="card-footer bg-transparent border-0 py-3">
                     <span class="btn btn-outline-primary">Управление <i class="bi bi-arrow-right ms-2"></i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Карточка Загрузка расписания -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{{ url_for('routes.upload_schedule') }}" class="dashboard-card card h-100 border-0 shadow-sm text-decoration-none">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-upload fs-1 me-3"></i>
+                        <h3 class="mb-0">Загрузка расписания</h3>
+                    </div>
+                </div>
+                <div class="card-body py-4">
+                    <p class="card-text">Загрузка файлов с расписанием экзаменов в формате CSV или Excel.</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 py-3">
+                    <span class="btn btn-outline-primary">Загрузить <i class="bi bi-arrow-right ms-2"></i></span>
                 </div>
             </a>
         </div>
