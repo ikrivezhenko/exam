@@ -4,11 +4,41 @@
 <div class="spacer-lg">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h1>Управление вопросами</h1>
-        <button class="btn btn-primary-elegant" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
-            <i class="bi bi-plus-lg"></i> Добавить вопрос
-        </button>
+        
     </div>
 
+    <!-- Форма добавления нового вопроса -->
+    <div class="card-elegant mb-5" id="addQuestionForm">
+        <div class="card-header-elegant">
+            <h2><i class="bi bi-plus-circle"></i> Добавить новый вопрос</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.program_id(class="form-control-elegant form-select") }}
+                            <label>Образовательная программа</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="form-floating">
+                            {{ form.text(class="form-control-elegant", placeholder="Текст вопроса", style="height: 120px; width: 620px") }}
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <button type="submit" class="btn btn-primary-elegant">
+                            <i class="bi bi-plus-lg"></i> Добавить вопрос
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список вопросов -->
     <div class="card-elegant">
         <div class="card-header-elegant">
             <h2><i class="bi bi-question-circle"></i> Список вопросов</h2>
@@ -50,37 +80,6 @@
                 <i class="bi bi-info-circle"></i> Нет вопросов
             </div>
             {% endif %}
-        </div>
-    </div>
-</div>
-
-<!-- Add Question Modal -->
-<div class="modal fade" id="addQuestionModal"  aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header elegant-modal-header">
-                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Добавить новый вопрос</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" id="questionForm">
-                    {{ form.hidden_tag() }}
-                    <div class="mb-4">
-                        {{ form.program_id.label(class="form-label fw-bold") }}
-                        {{ form.program_id(class="form-control-elegant form-select") }}
-                    </div>
-                    <div class="mb-4">
-                        {{ form.text.label(class="form-label fw-bold") }}
-                        {{ form.text(class="form-control-elegant", rows=4, placeholder="Введите текст вопроса") }}
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-elegant" data-bs-dismiss="modal">Отмена</button>
-                <button type="submit" class="btn btn-primary-elegant" form="questionForm">
-                    <i class="bi bi-plus-lg"></i> Добавить
-                </button>
-            </div>
         </div>
     </div>
 </div>

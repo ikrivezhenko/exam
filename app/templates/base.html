@@ -498,7 +498,49 @@
                     });
                 });
             });
+
+            if(document.querySelector('.modal-backdrop') && !document.querySelector('.modal.show')) {
+                document.querySelector('.modal-backdrop').remove();
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = 'auto';
+            }
+        
+            // Добавляем кнопку экстренного закрытия
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.querySelector('.modal-backdrop')) {
+                    document.querySelector('.modal-backdrop').remove();
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = 'auto';
+            }
+            
+            // Плавная прокрутка к форме
+            if (window.location.hash === '#addQuestionForm') {
+                const formElement = document.getElementById('addQuestionForm');
+                if (formElement) {
+                    formElement.scrollIntoView({ behavior: 'smooth' });
+                    formElement.style.animation = 'highlight 2s ease';
+                }
+            }
+            
         });
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes highlight {
+                0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
+                50% { box-shadow: 0 0 0 15px rgba(46, 125, 50, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
