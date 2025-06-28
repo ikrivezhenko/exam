@@ -278,55 +278,6 @@ def applicants():
     
     return render_template('applicants.html', form=form, upload_form=upload_form, applicants=applicants)
 
-
-@routes.route('/edit_applicant/<int:applicant_id>', methods=['GET', 'POST'])
-@login_required
-def edit_applicant(applicant_id):
-    if current_user.role not in ['admin', 'secretary']:
-        abort(403)
-
-    applicant = Applicant.query.get_or_404(applicant_id)
-
-    # Проверка доступа для секретаря
-    if current_user.role == 'secretary' and applicant.program.school_id != current_user.school_id:
-        abort(403)
-
-    form = ApplicantForm(obj=applicant)
-
-    # Фильтрация программ для секретаря
-    if current_user.role == 'secretary':
-        form.program_id.choices = [
-            (p.id, f"{p.code} {p.name}")
-            for p in Program.query.filter_by(school_id=current_user.school_id)
-        ]
-
-    if form.validate_on_submit():
-        applicant.full_name = form.full_name.data
-        applicant.program_id = form.program_id.data
-        db.session.commit()
-        flash('Данные абитуриента обновлены', 'success')
-        return redirect(url_for('routes.applicants'))
-
-    return render_template('edit_applicant.html', form=form, applicant=applicant)
-
-
-@routes.route('/delete_applicant/<int:applicant_id>', methods=['POST'])
-@login_required
-def delete_applicant(applicant_id):
-    if current_user.role not in ['admin', 'secretary']:
-        abort(403)
-
-    applicant = Applicant.query.get_or_404(applicant_id)
-
-    # Проверка доступа для секретаря
-    if current_user.role == 'secretary' and applicant.program.school_id != current_user.school_id:
-        abort(403)
-
-    db.session.delete(applicant)
-    db.session.commit()
-    flash('Абитуриент удален', 'success')
-    return redirect(url_for('routes.applicants'))
-
 # Назначение абитуриентов на дату экзамена
 @routes.route('/assign_applicants/<int:exam_date_id>', methods=['GET', 'POST'])
 @login_required
@@ -500,10 +451,10 @@ def add_user():
 def edit_user(user_id):
     if current_user.role != 'admin':
         abort(403)
-
+    
     user = User.query.get_or_404(user_id)
     form = UserForm(obj=user)
-
+    
     if form.validate_on_submit():
         user.username = form.username.data
         if form.password.data:
@@ -515,7 +466,7 @@ def edit_user(user_id):
         db.session.commit()
         flash('Данные пользователя обновлены')
         return redirect(url_for('routes.users'))
-
+    
     return render_template('edit_user.html', form=form, user=user)
 
 @routes.route('/delete_user/<int:user_id>', methods=['POST'])
