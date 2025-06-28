@@ -15,31 +15,37 @@
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     {{ form.username(class="form-control-elegant", placeholder="Логин") }}
-                                    <label>Логин пользователя</label>
+                                    
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    {{ form.password(class="form-control-elegant", placeholder="Пароль") }}
-                                    <label>Пароль (оставьте пустым, чтобы не менять)</label>
+                                    {{ form.password(class="form-control-elegant", placeholder="Пароль(оставьте пустым, чтобы не менять)") }}
+                                    
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     {{ form.full_name(class="form-control-elegant", placeholder="ФИО") }}
-                                    <label>Полное имя</label>
+                                    
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     {{ form.position(class="form-control-elegant", placeholder="Должность") }}
-                                    <label>Должность</label>
+                                    
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
                                     {{ form.role(class="form-control-elegant form-select") }}
                                     <label>Роль пользователя</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    {{ form.school_id(class="form-control-elegant form-select") }}
+                                    <label>Школа</label>
                                 </div>
                             </div>
                         </div>
