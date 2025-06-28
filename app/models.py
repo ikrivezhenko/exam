@@ -14,13 +14,12 @@ class User(UserMixin, db.Model):
     position = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(20), nullable=False)  # 'admin', 'secretary', 'commission'
     school_id = db.Column(db.Integer, db.ForeignKey('engineering_school.id'))
-    engineering_school = db.relationship('EngineeringSchool', backref='users')
     commission_members = db.relationship('CommissionMember', back_populates='user', cascade='all, delete-orphan')
     standard_commissions = db.relationship('StandardCommission', back_populates='user', cascade='all, delete-orphan')
 
 class Program(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(50), nullable=False, unique=True)
+    code = db.Column(db.String(50), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     school_id = db.Column(db.Integer, db.ForeignKey('engineering_school.id'))
     questions = db.relationship('Question', backref='program', lazy=True, cascade='all, delete-orphan')
