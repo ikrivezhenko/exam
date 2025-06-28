@@ -4,56 +4,123 @@
 <div class="admin-container">
     <h2>Управление датами экзаменов</h2>
 
-    <h3>Создать новую дату экзамена</h3>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.date.label }}
-            {{ form.date(class="form-control") }}
-        </div>
-        <div class="form-group">
-            {{ form.program_id.label }}
-            {{ form.program_id(class="form-control") }}
-        </div>
-        <div class="form-group">
-            {{ form.submit(class="btn") }}
-        </div>
-    </form>
+    <div class="content-card spacer-md">
+        <h3>Создать новую дату экзамена</h3>
+        <form method="POST" class="elegant-form">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.date.label(class="form-label") }}
+                        {{ form.date(class="form-control form-control-elegant") }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.program_id.label(class="form-label") }}
+                        {{ form.program_id(class="form-control form-control-elegant") }}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-primary-elegant btn-elegant") }}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 
-    <h3>Список экзаменационных дат</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Дата</th>
-                <th>Программа</th>
-                <th>Комиссия</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for exam_date in exam_dates %}
-            <tr>
-                <td>{{ exam_date.date.strftime('%d.%m.%Y') }}</td>
-                <td>{{ exam_date.program.code }} {{ exam_date.program.name }}</td>
-                <td>
-                    <ul>
-                        {% for member in exam_date.commission %}
-                        <li>{{ member.user.full_name }} ({{ member.role }})</li>
-                        {% endfor %}
-                    </ul>
-                </td>
-                <td>
-                    <a href="{{ url_for('routes.assign_commission', exam_date_id=exam_date.id) }}" class="btn">Редактировать комиссию</a>
-                    <a href="{{ url_for('routes.assign_applicants', exam_date_id=exam_date.id) }}" class="btn">Назначить абитуриентов</a>
-                    <a href="{{ url_for('routes.view_vedomost', exam_date_id=exam_date.id) }}" class="btn">Ведомость</a>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4">Нет созданных экзаменационных дат</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="content-card">
+        <h3>Список экзаменационных дат</h3>
+        <div class="table-responsive">
+            <table class="elegant-table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Программа</th>
+                        <th>Комиссия</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam_date in exam_dates %}
+                    <tr>
+                        <td>{{ exam_date.date.strftime('%d.%m.%Y') }}</td>
+                        <td>{{ exam_date.program.code }} {{ exam_date.program.name }}</td>
+                        <td>
+                            <ul class="commission-list">
+                                {% for member in exam_date.commission %}
+                                <li>{{ member.user.full_name }} ({{ member.role }})</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('routes.assign_commission', exam_date_id=exam_date.id) }}"
+                                   class="btn btn-outline-elegant btn-elegant btn-sm">
+                                    <i class="bi bi-people-fill"></i> Комиссия
+                                </a>
+                                <a href="{{ url_for('routes.assign_applicants', exam_date_id=exam_date.id) }}"
+                                   class="btn btn-outline-elegant btn-elegant btn-sm">
+                                    <i class="bi bi-person-plus-fill"></i> Абитуриенты
+                                </a>
+                                <a href="{{ url_for('routes.view_vedomost', exam_date_id=exam_date.id) }}"
+                                   class="btn btn-outline-elegant btn-elegant btn-sm">
+                                    <i class="bi bi-file-text-fill"></i> Ведомость
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">Нет созданных экзаменационных дат</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+<style>
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .elegant-form {
+        margin-top: 1.5rem;
+    }
+
+    .commission-list {
+        margin: 0;
+        padding-left: 1.2rem;
+    }
+
+    .commission-list li {
+        margin-bottom: 0.3rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-sm {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
 {% endblock %}
