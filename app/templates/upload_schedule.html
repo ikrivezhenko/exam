@@ -10,21 +10,16 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" enctype="multipart/form-data">
-                        {{ form.hidden_tag() }}
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Файл c расписанием</label>
-                            {{ form.file(class="form-control-elegant") }}
-                            <div class="form-text">Поддерживаемые форматы: CSV, XLS, XLSX</div>
-                        </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a href="{{ url_for('routes.home') }}" class="btn btn-outline-elegant me-md-2">
-                                <i class="bi bi-arrow-left"></i> Назад
-                            </a>
-                            <button type="submit" class="btn btn-primary-elegant">
-                                <i class="bi bi-upload"></i> Загрузить
-                            </button>
-                        </div>
-                    </form>
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="file">Выберите файл расписания:</label>
+        <input type="file" class="form-control-file" id="file" name="file" accept=".xlsx,.xls,.csv">
+        <small class="form-text text-muted">
+            Поддерживаемые форматы: Excel (.xlsx, .xls) или CSV
+        </small>
+    </div>
+    <button type="submit" class="btn btn-primary">Загрузить</button>
+</form>
                 </div>
             </div>
         </div>

@@ -54,4 +54,8 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
     return app

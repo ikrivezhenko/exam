@@ -16,6 +16,12 @@ from werkzeug.utils import secure_filename
 
 routes = Blueprint('routes', __name__)
 
+def allowed_file(filename):
+    """Проверяет разрешенные расширения файлов"""
+    allowed_extensions = {'xlsx', 'xls', 'csv', 'xlsm', 'xlsb'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
 # Вспомогательная функция для проверки доступа к программе
 def check_program_access(program_id):
     if current_user.role == 'admin':
@@ -720,73 +726,139 @@ def upload_applicants():
 def upload_schedule():
     if current_user.role not in ['admin', 'secretary']:
         abort(403)
-    
+
     form = UploadScheduleForm()
-    
+
     if form.validate_on_submit():
-        file = form.file.data
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-        
-        try:
-            if filename.endswith('.csv'):
-                df = pd.read_csv(file_path)
-            elif filename.endswith(('.xls', '.xlsx')):
-                df = pd.read_excel(file_path)
-            else:
-                flash('Неподдерживаемый формат файла')
-                return redirect(url_for('routes.upload_schedule'))
-            
-            for index, row in df.iterrows():
-                date_str = row['Дата']
-                program_code = row['Код программы']
-                program_name = row['Название программы']
-                
-                try:
-                    exam_date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-                except:
-                    flash(f'Ошибка формата даты в строке {index+1}: {date_str}')
-                    continue
-                    raise
-                
-                # Находим программу
-                program = Program.query.filter_by(code=program_code).first()
-                
-                # Для секретаря: создаем программу только в его школе
-                if not program and current_user.role == 'secretary':
-                    program = Program(
-                        code=program_code, 
-                        name=program_name,
-                        school_id=current_user.school_id
-                    )
-                    db.session.add(program)
-                    db.session.commit()
-                
-                # Пропуск если программа не найдена и не создана
-                if not program:
-                    flash(f'Программа с кодом {program_code} не найдена')
-                    continue
-                
-                # Проверка доступа для секретаря
-                if current_user.role == 'secretary' and program.school_id != current_user.school_id:
-                    flash(f'Нет доступа к программе {program_code}')
-                    continue
-                
-                # Создаем экзаменационную дату
-                exam_date = ExamDate(
-                    date=exam_date_obj, 
-                    program_id=program.id
-                )
-                db.session.add(exam_date)
-            
-            db.session.commit()
-            flash('Расписание успешно загружено')
-        except Exception as e:
-            flash(f'Ошибка при обработке файла: {str(e)}')
-        finally:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-        return redirect(url_for('routes.upload_schedule'))
-    
+        if 'file' not in request.files:
+            flash('Файл не был отправлен')
+            return redirect(request.url)
+
+        file = request.files['file']
+
+        if file.filename == '':
+            flash('Не выбран файл для загрузки')
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+            try:
+                filename = secure_filename(file.filename)
+                temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(temp_path)
+
+                # Чтение файла с учетом возможных разных форматов
+                if filename.endswith('.csv'):
+                    df = pd.read_csv(temp_path)
+                else:
+                    df = pd.read_excel(temp_path, engine='openpyxl')
+
+                print("Колонки в файле:", df.columns.tolist())
+
+                # Проверка обязательных столбцов
+                required_columns = ['Дата/Время экз', 'Дисциплина', 'ООП']
+                for col in required_columns:
+                    if col not in df.columns:
+                        raise ValueError(f"Отсутствует обязательная колонка: {col}")
+
+                # Обработка данных
+                for index, row in df.iterrows():
+                    try:
+                        # 1. Проверяем обязательные поля
+                        if not all(pd.notna(row[field]) for field in ['Ф', 'И', 'О']):
+                            raise ValueError("Отсутствует обязательное поле ФИО")
+
+                        # 2. Собираем ФИО в одну строку
+                        full_name = f"{row['Ф']} {row['И']} {row['О']}".strip()
+
+                        # 3. Обработка программы (как было)
+                        discipline_parts = str(row['Дисциплина']).split()
+                        program_code = discipline_parts[0]
+                        program_name = ' '.join(discipline_parts[1:])
+
+                        program = Program.query.filter_by(code=program_code).first()
+                        if not program:
+                            program = Program(
+                                code=program_code,
+                                name=program_name,
+                                school_id=current_user.school_id if current_user.role == 'secretary' else None
+                            )
+                            db.session.add(program)
+                            db.session.commit()
+
+                        # 4. Обработка даты экзамена
+                        exam_datetime = pd.to_datetime(row['Дата/Время экз'])
+                        exam_date = ExamDate.query.filter_by(
+                            date=exam_datetime,
+                            program_id=program.id
+                        ).first()
+
+                        if not exam_date:
+                            exam_date = ExamDate(
+                                date=exam_datetime,
+                                program_id=program.id
+                            )
+                            db.session.add(exam_date)
+                            db.session.commit()
+
+                        # 5. Поиск абитуриента по полному имени и программе
+                        applicant = Applicant.query.filter_by(
+                            full_name=full_name,
+                            program_id=program.id
+                        ).first()
+
+                        if not applicant:
+                            # Создаем нового абитуриента
+                            applicant = Applicant(
+                                full_name=full_name,
+                                program_id=program.id,
+                                exam_date_id=exam_date.id if exam_date else None
+                                # Другие поля, если они есть в вашей модели
+                            )
+                            db.session.add(applicant)
+
+                        # 6. Обновляем дату экзамена, если нужно
+                        if exam_date and not applicant.exam_date_id:
+                            applicant.exam_date_id = exam_date.id
+
+                    except Exception as e:
+                        flash(f'Ошибка в строке {index + 2}: {str(e)}', 'error')
+                        current_app.logger.error(f"Ошибка обработки строки {index + 2}", exc_info=e)
+                        continue
+
+                        db.session.commit()
+
+                        # 4. Связываем абитуриента с экзаменом (если связь еще не существует)
+                        if exam_date not in applicant.exams:
+                            applicant.exams.append(exam_date)
+
+                    except Exception as e:
+                        flash(f'Ошибка в строке {index + 2}: {str(e)}', 'error')
+                        current_app.logger.error(f"Ошибка в строке {index + 2}", exc_info=e)
+                        continue
+
+                        db.session.commit()
+
+                        # 4. Связь абитуриента с экзаменом (если еще не связаны)
+                        if applicant not in exam_date.applicants:
+                            exam_date.applicants.append(applicant)
+
+                    except Exception as e:
+                        flash(f'Ошибка в строке {index + 2}: {str(e)}', 'error')
+                        continue
+
+                db.session.commit()
+                flash('Расписание успешно загружено!', 'success')
+
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Ошибка при обработке файла: {str(e)}', 'error')
+
+            finally:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+
+            return redirect(url_for('routes.upload_schedule'))
+
+        flash('Допустимые форматы: .xlsx, .xls, .csv', 'error')
+
     return render_template('upload_schedule.html', form=form)
