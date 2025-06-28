@@ -9,6 +9,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
 
+
 def create_app():
     # Получаем абсолютный путь к директории приложения
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -45,7 +46,6 @@ def create_app():
     # Регистрация blueprint
     from .routes import routes as main_blueprint
     app.register_blueprint(main_blueprint)
-
     @app.errorhandler(404)
     def forbidden(e):
         return render_template('404.html')

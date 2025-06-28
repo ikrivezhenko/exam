@@ -98,7 +98,8 @@ def generate_protocol(applicant, exam_date):
                 border.set(qn('w:val'), 'single')
                 border.set(qn('w:sz'), '4')
                 border.set(qn('w:space'), '0')
-                border.set(qn('w:color'), 'auto')
+                border.set(qn('w:color'), '000000')
+                tblBorders.append(border)
             tblPr.append(tblBorders)
             tbl.append(tblPr)
 
@@ -122,6 +123,9 @@ def generate_protocol(applicant, exam_date):
                 p_elem = OxmlElement('w:p')
                 r = OxmlElement('w:r')
                 rPr = OxmlElement('w:rPr')
+
+                b = OxmlElement('w:b')  # жирный заголовок
+                rPr.append(b)
 
                 rFonts = OxmlElement('w:rFonts')
                 rFonts.set(qn('w:ascii'), 'Arial')
@@ -226,7 +230,8 @@ def generate_protocol(applicant, exam_date):
                 border.set(qn('w:val'), 'single')
                 border.set(qn('w:sz'), '4')
                 border.set(qn('w:space'), '0')
-                border.set(qn('w:color'), 'auto')
+                border.set(qn('w:color'), '000000')
+                tblBorders.append(border)
             tblPr.append(tblBorders)
             tbl.append(tblPr)
 
@@ -253,6 +258,9 @@ def generate_protocol(applicant, exam_date):
                 p_elem = OxmlElement('w:p')
                 r = OxmlElement('w:r')
                 rPr = OxmlElement('w:rPr')
+
+                b = OxmlElement('w:b')  # жирный заголовок
+                rPr.append(b)
 
                 rFonts = OxmlElement('w:rFonts')
                 rFonts.set(qn('w:ascii'), 'Arial')
