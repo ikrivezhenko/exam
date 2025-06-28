@@ -126,6 +126,8 @@ def delete_school(school_id):
     return redirect(url_for('routes.engineering_schools'))
 
 # Управление программами
+
+# Управление программами
 @routes.route('/programs', methods=['GET', 'POST'])
 @login_required
 def programs():
@@ -133,11 +135,13 @@ def programs():
         abort(403)
     
     form = ProgramForm()
-    
+
     # Для секретаря - только его школа
     if current_user.role == 'secretary':
         form.school_id.data = current_user.school_id
-    
+        form.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.order_by('name').all() if s.id == current_user.school_id]
+    else:
+        form.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.order_by('name').all()]
     if form.validate_on_submit():
         program = Program(
             code=form.code.data,

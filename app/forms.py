@@ -22,7 +22,7 @@ class ProgramForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(ProgramForm, self).__init__(*args, **kwargs)
-        self.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.all()]
+
 
 class ExamDateForm(FlaskForm):
     date = DateField('Дата экзамена', format='%Y-%m-%d', validators=[DataRequired()])
