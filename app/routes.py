@@ -357,6 +357,55 @@ def applicant_scores(applicant_id):
     
     return render_template('enter_scores_detail.html', applicant=applicant, form=form)
 
+@routes.route('/edit_applicant/<int:applicant_id>', methods=['GET', 'POST'])
+@login_required
+def edit_applicant(applicant_id):
+    if current_user.role not in ['admin', 'secretary']:
+        abort(403)
+
+    # Получаем абитуриента или возвращаем 404
+    applicant = Applicant.query.get_or_404(applicant_id)
+
+    # Создаем форму редактирования
+    form = ApplicantForm(obj=applicant)
+
+    # Фильтрация программ для секретаря
+    if current_user.role == 'secretary':
+        form.program_id.choices = [
+            (p.id, f"{p.code} {p.name}")
+            for p in Program.query.filter_by(school_id=current_user.school_id)
+        ]
+
+    if form.validate_on_submit():
+        # Обновляем данные
+        applicant.full_name = form.full_name.data
+        applicant.program_id = form.program_id.data
+
+        db.session.commit()
+        flash('Данные абитуриента обновлены', 'success')
+        return redirect(url_for('routes.applicants'))
+
+    return render_template('edit_applicant.html', form=form, applicant=applicant)
+
+@routes.route('/delete_applicant/<int:applicant_id>', methods=['POST'])
+@login_required
+def delete_applicant(applicant_id):
+    if current_user.role not in ['admin', 'secretary']:
+        abort(403)
+
+    # Получаем абитуриента или возвращаем 404
+    applicant = Applicant.query.get_or_404(applicant_id)
+
+    # Удаляем связанные данные (если нужно)
+    Score.query.filter_by(applicant_id=applicant_id).delete()
+    ExamDate.query.filter_by(applicant_id=applicant_id).delete()
+
+    # Удаляем абитуриента
+    db.session.delete(applicant)
+    db.session.commit()
+
+    flash('Абитуриент успешно удален', 'success')
+    return redirect(url_for('routes.applicants'))
 
 
 # Генерация протокола

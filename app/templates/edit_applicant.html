@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="spacer-lg">
+    <div class="card-elegant">
+        <div class="card-header-elegant">
+            <h2><i class="bi bi-pencil"></i> Редактирование абитуриента</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-4">
+                    {{ form.full_name.label(class="form-label fw-bold") }}
+                    {{ form.full_name(class="form-control-elegant") }}
+                </div>
+                <div class="mb-4">
+                    {{ form.program_id.label(class="form-label fw-bold") }}
+                    {{ form.program_id(class="form-control-elegant form-select") }}
+                </div>
+                <div class="d-flex justify-content-end gap-3 mt-5">
+                    <a href="{{ url_for('routes.applicants') }}" class="btn btn-outline-elegant">
+                        <i class="bi bi-x-lg"></i> Отмена
+                    </a>
+                    <button type="submit" class="btn btn-primary-elegant">
+                        <i class="bi bi-check-lg"></i> Обновить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

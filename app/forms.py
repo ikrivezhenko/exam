@@ -24,6 +24,8 @@ class ProgramForm(FlaskForm):
         super(ProgramForm, self).__init__(*args, **kwargs)
 
 
+
+
 class ExamDateForm(FlaskForm):
     date = DateField('Дата экзамена', format='%Y-%m-%d', validators=[DataRequired()])
     program_id = SelectField('Программа', coerce=int, validators=[DataRequired()])
@@ -55,6 +57,13 @@ class ApplicantForm(FlaskForm):
         super(ApplicantForm, self).__init__(*args, **kwargs)
         self.program_id.choices = [(p.id, f"{p.code} {p.name}") for p in Program.query.all()]
 
+
+class EditApplicantForm(ApplicantForm):
+    # Изменяем метку кнопки
+    submit = SubmitField('Обновить')
+
+    def __init__(self, *args, **kwargs):
+        super(EditApplicantForm, self).__init__(*args, **kwargs)
 class ScoreForm(FlaskForm):
     question_id = SelectField('Вопрос', coerce=int, validators=[DataRequired()])
     score = IntegerField('Балл', validators=[DataRequired()])
