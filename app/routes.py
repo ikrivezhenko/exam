@@ -415,6 +415,25 @@ def assign_applicants(exam_date_id):
         unassigned_applicants=unassigned_applicants
     )
 
+# Добавьте новый маршрут для редактирования школ
+@routes.route('/edit_engineering_school/<int:school_id>', methods=['GET', 'POST'])
+@login_required
+def edit_engineering_school(school_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    school = EngineeringSchool.query.get_or_404(school_id)
+    form = EngineeringSchoolForm(obj=school)
+    
+    if form.validate_on_submit():
+        form.populate_obj(school)
+        db.session.commit()
+        flash('Инженерная школа успешно обновлена', 'success')
+        return redirect(url_for('routes.engineering_schools'))
+    
+    return render_template('edit_engineering_school.html', form=form, school=school)
+
+
 # Выставление баллов
 @routes.route('/enter_scores')
 @login_required
