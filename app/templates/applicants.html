@@ -52,7 +52,7 @@
                     </thead>
                     <tbody>
                         {% for applicant in applicants %}
-                        <tr>
+                        <tr class="{% if applicant.exam_date and not applicant.scores %}bg-warning bg-opacity-10{% endif %}">
                             <td class="fw-bold">{{ applicant.full_name }}</td>
                             <td>{{ applicant.program.code }} {{ applicant.program.name }}</td>
                             <td>
