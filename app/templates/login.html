@@ -1,21 +1,27 @@
 {% extends "base.html" %}
 
+{% block title %}Вход в систему{% endblock %}
+
 {% block content %}
-<div class="login-form">
-    <h2>Вход в систему</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.username.label }}
-            {{ form.username(class="form-control") }}
-        </div>
-        <div class="form-group">
-            {{ form.password.label }}
-            {{ form.password(class="form-control") }}
-        </div>
-        <div class="form-group">
-            {{ form.submit(class="btn") }}
-        </div>
-    </form>
+<div class="content-card">
+    <div class="content-card-header">
+        <h1>Вход в систему</h1>
+    </div>
+    <div class="login-form">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.username.label }}
+                {{ form.username(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary-elegant") }}
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

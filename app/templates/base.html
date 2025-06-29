@@ -886,6 +886,7 @@
                     <a href="{{ url_for('routes.login') }}" class="menu-item">
                         <i class="bi bi-box-arrow-in-right"></i>
                         <span>Вход</span>
+                    </a>
                 </div>
             {% endif %}
         </nav>
@@ -901,19 +902,18 @@
         <div class="header-container">
             <div class="header-left">
                 {% if current_user.is_authenticated %}
-                    <div class="header-left">
-                        <button class="toggle-sidebar-btn">
-                            <i class="bi bi-list"></i>
-                        </button>
-                        <a href="javascript:history.back()" class="back-btn">
-                            <i class="bi bi-arrow-left-circle"></i>
-                        </a>
-                        <a href="{{ url_for('routes.home') }}" class="logo">
-                            <i class="bi bi-journal-check"></i>
-                            <span>Система оценки</span>
-                        </a>
-                    </div>
+                    <button class="toggle-sidebar-btn">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <a href="javascript:history.back()" class="back-btn">
+                        <i class="bi bi-arrow-left-circle"></i>
+                    </a>
                 {% endif %}
+                <a href="{{ url_for('routes.home') }}" class="logo">
+                    <i class="bi bi-journal-check"></i>
+                    <span>Система оценки</span>
+                </a>
+            </div>
 
             <nav class="user-nav">
                 {% if current_user.is_authenticated %}
