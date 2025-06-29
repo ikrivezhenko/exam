@@ -203,15 +203,41 @@ def exam_dates():
         db.session.commit()
         flash('Дата экзамена добавлена')
         return redirect(url_for('routes.exam_dates'))
+    
+    # Получаем параметры фильтрации и сортировки из запроса
+    sort_order = request.args.get('sort', 'desc')  # asc или desc
+    program_filter = request.args.get('program_filter', '').strip()
+    
+    # Базовый запрос
     if current_user.role == 'secretary':
-        exam_dates = ExamDate.query \
+        query = ExamDate.query \
             .join(Program) \
-            .filter(Program.school_id == current_user.school_id) \
-            .all()
+            .filter(Program.school_id == current_user.school_id)
     else:
-        exam_dates = ExamDate.query.all()
-    return render_template('exam_dates.html', form=form, exam_dates=exam_dates)
-
+        query = ExamDate.query
+    
+    # Применяем фильтр по названию программы
+    if program_filter:
+        query = query.join(Program).filter(
+            db.or_(
+                Program.name.ilike(f'%{program_filter}%'),
+                Program.code.ilike(f'%{program_filter}%')
+            )
+        )
+    
+    # Применяем сортировку
+    if sort_order == 'asc':
+        exam_dates = query.order_by(ExamDate.date.asc()).all()
+    else:  # desc по умолчанию
+        exam_dates = query.order_by(ExamDate.date.desc()).all()
+    
+    return render_template(
+        'exam_dates.html', 
+        form=form, 
+        exam_dates=exam_dates,
+        sort_order=sort_order,
+        program_filter=program_filter
+    )
 
 
 @routes.route('/edit_program/<int:program_id>', methods=['GET', 'POST'])
@@ -304,11 +330,39 @@ def applicants():
     if current_user.role == 'secretary':
         applicants = Applicant.query.join(Program).filter(
             Program.school_id == current_user.school_id
-        ).all()
-    else:  # admin
-        applicants = Applicant.query.all()
+        ).order_by(Applicant.id.desc()).all()  # Сортировка по ID в обратном порядке
+    else:
+        applicants = Applicant.query.order_by(Applicant.id.desc()).all()
     
     return render_template('applicants.html', form=form, upload_form=upload_form, applicants=applicants)
+
+
+# Добавляем новый обработчик для удаления экзамена
+@routes.route('/delete_exam_date/<int:exam_date_id>', methods=['POST'])
+@login_required
+def delete_exam_date(exam_date_id):
+    if current_user.role not in ['admin', 'secretary']:
+        abort(403)
+    
+    exam_date = ExamDate.query.get_or_404(exam_date_id)
+    
+    # Проверка доступа для секретаря
+    if current_user.role == 'secretary':
+        if exam_date.program.school_id != current_user.school_id:
+            abort(403)
+    
+    # Удаляем связанных членов комиссии
+    CommissionMember.query.filter_by(exam_date_id=exam_date_id).delete()
+    
+    # Сбрасываем exam_date_id у абитуриентов
+    Applicant.query.filter_by(exam_date_id=exam_date_id).update({Applicant.exam_date_id: None})
+    
+    # Удаляем экзаменационную дату
+    db.session.delete(exam_date)
+    db.session.commit()
+    
+    flash('Экзаменационная дата удалена', 'success')
+    return redirect(url_for('routes.exam_dates'))
 
 # Назначение абитуриентов на дату экзамена
 @routes.route('/assign_applicants/<int:exam_date_id>', methods=['GET', 'POST'])

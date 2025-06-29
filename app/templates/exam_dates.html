@@ -31,6 +31,48 @@
     </div>
 
     <div class="content-card">
+        <h3>Фильтрация и сортировка</h3>
+        <form method="GET" class="elegant-form mb-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="program_filter" class="form-label">Фильтр по программе</label>
+                        <input type="text" 
+                            class="form-control form-control-elegant" 
+                            id="program_filter"
+                            name="program_filter"
+                            value="{{ program_filter }}"
+                            placeholder="Введите название или код">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Сортировка по дате</label>
+                        <div class="btn-group w-100">
+                            <a href="{{ url_for('routes.exam_dates', sort='asc', program_filter=program_filter) }}"
+                            class="btn btn-outline-elegant btn-elegant {% if sort_order == 'asc' %}active{% endif %}">
+                                По возрастанию
+                            </a>
+                            <a href="{{ url_for('routes.exam_dates', sort='desc', program_filter=program_filter) }}"
+                            class="btn btn-outline-elegant btn-elegant {% if sort_order == 'desc' %}active{% endif %}">
+                                По убыванию
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary-elegant btn-elegant">
+                        Применить фильтр
+                    </button>
+                    <a href="{{ url_for('routes.exam_dates') }}" class="btn btn-outline-elegant btn-elegant">
+                        Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="content-card">
         <h3>Список экзаменационных дат</h3>
         <div class="table-responsive">
             <table class="elegant-table">
@@ -68,6 +110,15 @@
                                    class="btn btn-outline-elegant btn-elegant btn-sm">
                                     <i class="bi bi-file-text-fill"></i> Ведомость
                                 </a>
+
+                                <form action="{{ url_for('routes.delete_exam_date', exam_date_id=exam_date.id) }}" 
+                                    method="POST" 
+                                    class="d-inline"
+                                    onsubmit="return confirm('Вы уверены, что хотите удалить эту экзаменационную дату?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash-fill"></i> Удалить
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -122,5 +173,28 @@
             justify-content: center;
         }
     }
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+    
+    /* Для мобильной адаптации */
+    @media (max-width: 768px) {
+        .action-buttons form {
+            width: 100%;
+        }
+        
+        .action-buttons button {
+            width: 100%;
+            margin-top: 5px;
+        }
+    }
+
 </style>
 {% endblock %}

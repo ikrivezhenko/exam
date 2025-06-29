@@ -291,7 +291,7 @@ def generate_vedomost(exam_date):
     ]
     # Фильтруем абитуриентов - оставляем только тех, у кого есть вопросы (даже если все ответы 0)
     present_applicants = [a for a in exam_date.applicants if getattr(a, 'scores', None)]
-    sorted_applicants = sorted(present_applicants, key=lambda x: x.full_name.lower())
+    sorted_applicants = sorted(present_applicants, key=lambda x: x.full_name.lower(), reverse=True)
 
     for i, applicant in enumerate(sorted_applicants, start=1):
         total_score = sum(score.score for score in applicant.scores) if applicant.scores else 0
