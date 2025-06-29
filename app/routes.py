@@ -1,4 +1,6 @@
+import csv
 import pandas as pd
+import re
 from flask import render_template, redirect, send_from_directory, url_for, flash, request, send_file, abort, Blueprint, current_app
 from flask_login import login_user, logout_user, current_user, login_required
 from . import db, bcrypt
@@ -819,13 +821,13 @@ def upload_schedule():
 
     if form.validate_on_submit():
         if 'file' not in request.files:
-            flash('Файл не был отправлен')
+            flash('Файл не был отправлен', 'error')
             return redirect(request.url)
 
         file = request.files['file']
 
         if file.filename == '':
-            flash('Не выбран файл для загрузки')
+            flash('Не выбран файл для загрузки', 'error')
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
@@ -834,35 +836,116 @@ def upload_schedule():
                 temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(temp_path)
 
-                # Чтение файла с учетом возможных разных форматов
+                # Чтение файла
                 if filename.endswith('.csv'):
-                    df = pd.read_csv(temp_path)
+                    # Автоопределение разделителя для CSV
+                    with open(temp_path, 'r', encoding='utf-8') as f:
+                        sample = f.read(1024)
+                        sniffer = csv.Sniffer()
+                        dialect = sniffer.sniff(sample)
+                    df = pd.read_csv(temp_path, sep=dialect.delimiter, dtype=str, skip_blank_lines=False)
                 else:
-                    df = pd.read_excel(temp_path, engine='openpyxl')
+                    # Чтение Excel файла
+                    df = pd.read_excel(temp_path, dtype=str, header=None, engine='openpyxl')
 
-                print("Колонки в файле:", df.columns.tolist())
+                # Удаление полностью пустых строк
+                df = df.dropna(how='all')
+                df.reset_index(drop=True, inplace=True)
 
-                # Проверка обязательных столбцов
-                required_columns = ['Дата/Время экз', 'Дисциплина', 'ООП']
-                for col in required_columns:
-                    if col not in df.columns:
-                        raise ValueError(f"Отсутствует обязательная колонка: {col}")
-
+                # Поиск строки с заголовками таблицы
+                header_index = None
+                required_headers = ['дата', 'фамилия', 'имя', 'отчество', 'ооп', 'направление']
+                
+                # Проверяем первые 10 строк
+                for i in range(min(10, len(df))):
+                    # Приводим все к нижнему регистру и удаляем пробелы
+                    row = df.iloc[i].apply(lambda x: str(x).strip().lower().replace(' ', '') if pd.notna(x) else '')
+                    
+                    # Проверяем наличие ключевых заголовков
+                    if all(header in row.values for header in required_headers):
+                        header_index = i
+                        break
+                
+                if header_index is None:
+                    # Если не нашли по ключевым словам, ищем по структуре
+                    for i in range(min(10, len(df))):
+                        if len(df.iloc[i]) >= 6:  # Должно быть хотя бы 6 колонок
+                            header_index = i
+                            break
+                
+                if header_index is None:
+                    flash('Не удалось определить начало таблицы в файле', 'error')
+                    return redirect(url_for('routes.upload_schedule'))
+                
+                # Устанавливаем заголовки
+                new_columns = df.iloc[header_index].apply(lambda x: str(x).strip() if pd.notna(x) else f'col_{i}')
+                df.columns = new_columns
+                df = df.iloc[header_index+1:]
+                
+                # Удаление полностью пустых строк
+                df = df.dropna(how='all')
+                df.reset_index(drop=True, inplace=True)
+                
+                # Стандартизация названий колонок
+                column_mapping = {
+                    'дата': 'Дата/Время экз',
+                    'дата/времяэкз': 'Дата/Время экз',
+                    'датаивремяэкзамена': 'Дата/Время экз',
+                    'date': 'Дата/Время экз',
+                    'дисциплина': 'Дисциплина',
+                    'discipline': 'Дисциплина',
+                    'направление': 'Дисциплина',
+                    'ооп': 'ООП',
+                    'образовательнаяпрограмма': 'ООП',
+                    'program': 'ООП',
+                    'программа': 'ООП',
+                    'фамилия': 'Ф',
+                    'ф': 'Ф',
+                    'lastname': 'Ф',
+                    'имя': 'И',
+                    'и': 'И',
+                    'firstname': 'И',
+                    'отчество': 'О',
+                    'о': 'О',
+                    'patronymic': 'О'
+                }
+                
+                df = df.rename(columns={
+                    col: column_mapping.get(col.lower().replace(' ', ''), col) 
+                    for col in df.columns
+                })
+                
+                # Проверка обязательных колонок
+                required_columns = ['Дата/Время экз', 'Дисциплина', 'ООП', 'Ф', 'И', 'О']
+                missing_columns = [col for col in required_columns if col not in df.columns]
+                
+                if missing_columns:
+                    flash(f'Отсутствуют обязательные колонки: {", ".join(missing_columns)}', 'error')
+                    return redirect(url_for('routes.upload_schedule'))
+                
                 # Обработка данных
                 for index, row in df.iterrows():
                     try:
                         # 1. Проверяем обязательные поля
                         if not all(pd.notna(row[field]) for field in ['Ф', 'И', 'О']):
                             raise ValueError("Отсутствует обязательное поле ФИО")
-
+                        
                         # 2. Собираем ФИО в одну строку
                         full_name = f"{row['Ф']} {row['И']} {row['О']}".strip()
-
-                        # 3. Обработка программы (как было)
-                        discipline_parts = str(row['Дисциплина']).split()
-                        program_code = discipline_parts[0]
-                        program_name = ' '.join(discipline_parts[1:])
-
+                        
+                        # 3. Обработка программы
+                        program_code = str(row['ООП']).split()[0] if pd.notna(row['ООП']) else ''
+                        program_name = ' '.join(str(row['ООП']).split()[1:]) if pd.notna(row['ООП']) else ''
+                        
+                        if not program_code:
+                            # Если код не указан, используем направление
+                            program_code = str(row['Дисциплина']).split()[0] if pd.notna(row['Дисциплина']) else ''
+                            program_name = ' '.join(str(row['Дисциплина']).split()[1:]) if pd.notna(row['Дисциплина']) else ''
+                        
+                        if not program_code:
+                            raise ValueError("Не указан код программы")
+                        
+                        # Поиск или создание программы
                         program = Program.query.filter_by(code=program_code).first()
                         if not program:
                             program = Program(
@@ -872,81 +955,71 @@ def upload_schedule():
                             )
                             db.session.add(program)
                             db.session.commit()
-
+                        
                         # 4. Обработка даты экзамена
-                        exam_datetime = pd.to_datetime(row['Дата/Время экз'])
-                        exam_date = ExamDate.query.filter_by(
-                            date=exam_datetime,
-                            program_id=program.id
-                        ).first()
-
-                        if not exam_date:
-                            exam_date = ExamDate(
+                        exam_datetime = None
+                        if pd.notna(row['Дата/Время экз']):
+                            try:
+                                # Пробуем разные форматы дат
+                                exam_datetime = pd.to_datetime(row['Дата/Время экз'], errors='coerce')
+                                if pd.isna(exam_datetime):
+                                    exam_datetime = pd.to_datetime(row['Дата/Время экз'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+                                if pd.isna(exam_datetime):
+                                    exam_datetime = pd.to_datetime(row['Дата/Время экз'], format='%d.%m.%Y %H:%M', errors='coerce')
+                            except Exception as e:
+                                current_app.logger.error(f"Ошибка преобразования даты: {str(e)}")
+                        
+                        if exam_datetime and not pd.isna(exam_datetime):
+                            # Поиск или создание даты экзамена
+                            exam_date = ExamDate.query.filter_by(
                                 date=exam_datetime,
                                 program_id=program.id
-                            )
-                            db.session.add(exam_date)
-                            db.session.commit()
-
-                        # 5. Поиск абитуриента по полному имени и программе
-                        applicant = Applicant.query.filter_by(
-                            full_name=full_name,
-                            program_id=program.id
-                        ).first()
-
-                        if not applicant:
-                            # Создаем нового абитуриента
-                            applicant = Applicant(
+                            ).first()
+                            
+                            if not exam_date:
+                                exam_date = ExamDate(
+                                    date=exam_datetime,
+                                    program_id=program.id
+                                )
+                                db.session.add(exam_date)
+                                db.session.commit()
+                            
+                            # 5. Поиск абитуриента
+                            applicant = Applicant.query.filter_by(
                                 full_name=full_name,
-                                program_id=program.id,
-                                exam_date_id=exam_date.id if exam_date else None
-                                # Другие поля, если они есть в вашей модели
-                            )
-                            db.session.add(applicant)
-
-                        # 6. Обновляем дату экзамена, если нужно
-                        if exam_date and not applicant.exam_date_id:
-                            applicant.exam_date_id = exam_date.id
-
+                                program_id=program.id
+                            ).first()
+                            
+                            if not applicant:
+                                applicant = Applicant(
+                                    full_name=full_name,
+                                    program_id=program.id,
+                                    exam_date_id=exam_date.id
+                                )
+                                db.session.add(applicant)
+                            else:
+                                # Обновляем дату экзамена
+                                applicant.exam_date_id = exam_date.id
+                            
+                            db.session.commit()
+                    
                     except Exception as e:
-                        flash(f'Ошибка в строке {index + 2}: {str(e)}', 'error')
-                        current_app.logger.error(f"Ошибка обработки строки {index + 2}", exc_info=e)
-                        continue
-
-                        db.session.commit()
-
-                        # 4. Связываем абитуриента с экзаменом (если связь еще не существует)
-                        if exam_date not in applicant.exams:
-                            applicant.exams.append(exam_date)
-
-                    except Exception as e:
-                        flash(f'Ошибка в строке {index + 2}: {str(e)}', 'error')
-                        current_app.logger.error(f"Ошибка в строке {index + 2}", exc_info=e)
-                        continue
-
-                        db.session.commit()
-
-                        # 4. Связь абитуриента с экзаменом (если еще не связаны)
-                        if applicant not in exam_date.applicants:
-                            exam_date.applicants.append(applicant)
-
-                    except Exception as e:
-                        flash(f'Ошибка в строке {index + 2}: {str(e)}', 'error')
-                        continue
-
-                db.session.commit()
+                        flash(f'Ошибка в строке {index + 1}: {str(e)}', 'error')
+                        current_app.logger.error(f"Ошибка обработки строки {index + 1}", exc_info=True)
+                
                 flash('Расписание успешно загружено!', 'success')
-
+            
             except Exception as e:
                 db.session.rollback()
                 flash(f'Ошибка при обработке файла: {str(e)}', 'error')
-
+                current_app.logger.error("Ошибка обработки файла", exc_info=True)
+            
             finally:
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
-
+            
             return redirect(url_for('routes.upload_schedule'))
-
+        
         flash('Допустимые форматы: .xlsx, .xls, .csv', 'error')
-
+    
     return render_template('upload_schedule.html', form=form)
