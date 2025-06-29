@@ -323,24 +323,29 @@ def enter_scores():
 def applicant_scores(applicant_id):
     if current_user.role not in ['admin', 'secretary', 'commission']:
         abort(403)
-    
+
     applicant = Applicant.query.get_or_404(applicant_id)
     exam_date = applicant.exam_date
 
     form = ScoreForm()
     form.question_id.choices = [(q.id, q.text) for q in Question.query.filter_by(program_id=applicant.program_id).all()]
-    
+
     if form.validate_on_submit():
+        # Проверка что оценка в допустимом диапазоне (0-100)
+        if form.score.data < 0 or form.score.data > 100:
+            flash('Оценка должна быть в диапазоне от 0 до 100', 'error')
+            return redirect(url_for('routes.applicant_scores', applicant_id=applicant_id))
+
         total_score = sum(score.score for score in applicant.scores)
         if total_score + form.score.data > 100:
             flash('Сумма баллов не может превышать 100')
             return redirect(url_for('routes.applicant_scores', applicant_id=applicant_id))
-        
+
         existing_score = Score.query.filter_by(
             applicant_id=applicant_id,
             question_id=form.question_id.data
         ).first()
-        
+
         if existing_score:
             flash('Этот вопрос уже был задан абитуриенту')
         else:
@@ -352,9 +357,9 @@ def applicant_scores(applicant_id):
             db.session.add(score)
             db.session.commit()
             flash('Балл добавлен')
-        
+
         return redirect(url_for('routes.applicant_scores', applicant_id=applicant_id))
-    
+
     return render_template('enter_scores_detail.html', applicant=applicant, form=form)
 
 @routes.route('/edit_applicant/<int:applicant_id>', methods=['GET', 'POST'])

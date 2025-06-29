@@ -205,22 +205,38 @@ def generate_protocol(applicant, exam_date):
         )
 
     # 3. Таблица вопросов
-    total = sum(score.score for score in applicant.scores)
-    questions_data = [
-        [['№', {'bold': True}], ['Вопрос', {'bold': True}], ['Балл', {'bold': True}]]
-    ]
-    questions_data.extend(
-        [[str(i), {}], [score.question.text, {}], [str(score.score), {}]]
-        for i, score in enumerate(applicant.scores, start=1)
-    )
-    questions_data.append([['ИТОГО', {'bold': True}], ['', {}], [str(total), {'bold': True}]])
+    if not applicant.scores:
+        # Если нет вопросов - добавляем отметку о неявке
+        questions_data = [
+            [['Примечание', {'bold': True, 'size': '24'}]],
+            [['Неявка', {'size': '24'}]]
+        ]
+        insert_table_after_paragraph(
+            doc,
+            '{questions_table}',
+            questions_data,
+            [5000]  # Ширина колонки
+        )
 
-    insert_table_after_paragraph(
-        doc,
-        '{questions_table}',
-        questions_data,
-        [100, 4400, 500]  # Ширина колонок
-    )
+        # Удаляем плейсхолдер общего балла
+        replace_placeholder(doc, '{total_score}', '0')
+    else:
+        total = sum(score.score for score in applicant.scores)
+        questions_data = [
+            [['№', {'bold': True}], ['Вопрос', {'bold': True}], ['Балл', {'bold': True}]]
+        ]
+        questions_data.extend(
+            [[str(i), {}], [score.question.text, {}], [str(score.score), {}]]
+            for i, score in enumerate(applicant.scores, start=1)
+        )
+        questions_data.append([['ИТОГО', {'bold': True}], ['', {}], [str(total), {'bold': True}]])
+
+        insert_table_after_paragraph(
+            doc,
+            '{questions_table}',
+            questions_data,
+            [100, 4400, 500]  # Ширина колонок
+        )
 
     # 4. Замена общего балла
     for p in doc.paragraphs:
@@ -273,9 +289,12 @@ def generate_vedomost(exam_date):
     questions_data = [
         [['№ п/п', {'bold': True, 'size': '24'}], ['ФИО поступающего', {'bold': True, 'size': '24'}], ['Балл за ВИ', {'bold': True, 'size': '24'}]]
     ]
-    sorted_applicants = sorted(exam_date.applicants, key=lambda x: x.full_name.lower())
+    # Фильтруем абитуриентов - оставляем только тех, у кого есть вопросы (даже если все ответы 0)
+    present_applicants = [a for a in exam_date.applicants if getattr(a, 'scores', None)]
+    sorted_applicants = sorted(present_applicants, key=lambda x: x.full_name.lower())
+
     for i, applicant in enumerate(sorted_applicants, start=1):
-        total_score = sum(score.score for score in applicant.scores)
+        total_score = sum(score.score for score in applicant.scores) if applicant.scores else 0
         questions_data.append([
             [str(i), {'size': '24'}],
             [applicant.full_name, {'size': '24'}],
