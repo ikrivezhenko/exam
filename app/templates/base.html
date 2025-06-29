@@ -25,6 +25,7 @@
             --info: #2196f3;          /* информация */
             --warning: #ff9800;       /* предупреждение */
             --danger: #f44336;        /* ошибка */
+            --sidebar-width: 280px;   /* ширина бокового меню */
         }
 
         body {
@@ -33,6 +34,243 @@
             color: var(--dark-text);
             line-height: 1.7;
             padding-top: 0;
+            margin-left: var(--sidebar-width);
+        }
+
+        /* Стили для кнопки свернуть/развернуть */
+        .toggle-sidebar-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0 15px;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-sidebar-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* Для мобильных - скрыть кнопку назад и оставить только toggle */
+        @media (max-width: 768px) {
+            .back-btn {
+                display: none;
+            }
+            .toggle-sidebar-btn {
+                padding: 0 10px;
+            }
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-areas:
+                "sidebar header"
+                "sidebar main"
+                "sidebar footer";
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            width: 280px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            transition: width 0.3s ease;
+        }
+
+        .main-header {
+            grid-area: header;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-content {
+            grid-area: main;
+            padding: 20px;
+        }
+        /* Базовые стили сайдбара */
+        .sidebar {
+            width: 280px;
+            transition: width 0.3s ease;
+            overflow: hidden;
+        }
+
+        /* Свернутое состояние */
+        .sidebar.collapsed {
+            width: 70px; /* Ширина только под иконки */
+        }
+
+        .sidebar.collapsed .sidebar-title span,
+        .sidebar.collapsed .menu-item span,
+        .sidebar.collapsed .menu-section-title {
+            display: none; /* Скрываем текст */
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+            padding: 0.8rem 0;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin-right: 0;
+            font-size: 1.4rem;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+
+        /* Анимация иконок при наведении */
+        .sidebar.collapsed .menu-item:hover::after {
+            content: attr(data-title);
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background: var(--primary-dark);
+            padding: 0.8rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            white-space: nowrap;
+            margin-left: 10px;
+            z-index: 1000;
+        }
+        .main-footer {
+            grid-area: footer;
+            width: 100%;
+        }
+
+        /* Свернутое состояние */
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        body:not(.sidebar-collapsed) {
+            grid-template-columns: 280px 1fr;
+        }
+
+        body.sidebar-collapsed {
+            grid-template-columns: 70px 1fr;
+        }
+
+        /* Убираем все лишние margin-left */
+        .main-header,
+        .main-content,
+        .main-footer {
+            margin-left: 0 !important;
+        }
+
+        /* Адаптация для мобильных */
+        @media (max-width: 768px) {
+            body {
+                grid-template-areas:
+                    "header"
+                    "main"
+                    "footer";
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                z-index: 1100;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--primary-dark);
+            color: white;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        .sidebar * {
+            color: inherit; /* Наследует цвет от .sidebar */
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center; /* Центрируем по горизонтали */
+            align-items: center; /* Центрируем по вертикали */
+            text-align: center; /* Центрируем текст */
+            height: 80px; /* Фиксированная высота */
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .menu-section-title {
+            padding: 0.5rem 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: var(--accent);
+        }
+
+        .menu-item i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-item .badge {
+            margin-left: auto;
+            background-color: var(--accent);
+            color: var(--dark-text);
+            font-size: 0.7rem;
         }
 
         /* Header */
@@ -44,21 +282,26 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            width: 100%; /* Занимает всю ширину */
+            margin-left: 0; /* Убираем margin-left */
         }
 
         .header-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 20px;
+            gap: 20px;
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 15px;
+            flex-grow: 1; /* Растягивается на всё доступное пространство */
+            min-width: 0; /* Позволяет сжиматься */
         }
 
         .logo {
@@ -69,6 +312,7 @@
             color: white;
             text-decoration: none;
             letter-spacing: -0.5px;
+            margin-right: 2rem; /* Добавлен отступ справа */
         }
 
         .logo i {
@@ -95,11 +339,15 @@
         .user-nav {
             display: flex;
             align-items: center;
-            gap: 20px;
+            flex-shrink: 0; /* Запрещаем сжимание */
+            gap: 15px;
         }
 
         .user-info {
             text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .user-name {
@@ -143,10 +391,11 @@
         }
 
         /* Main Content */
-        .main-content {
+         .main-content {
             max-width: 1400px;
-            margin: 3rem auto;
+            margin: 1rem auto; /* Уменьшаем верхний отступ */
             padding: 0 2rem;
+            min-height: calc(100vh - 200px);
         }
 
         .content-card {
@@ -168,6 +417,12 @@
             width: 100%;
             height: 5px;
             background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .content-card-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         /* Flash Messages */
@@ -205,14 +460,41 @@
         .main-footer {
             background-color: var(--primary-dark);
             color: rgba(255, 255, 255, 0.85);
-            padding: 3rem 0 2rem;
+            padding: 2rem 0;
             text-align: center;
+            width: 100%; /* Занимает всю ширину */
+            margin-left: 0; /* Убираем margin-left */
         }
 
         .footer-content {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        .footer-copyright {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         /* Typography */
@@ -381,6 +663,10 @@
 
         /* Responsive */
         @media (max-width: 992px) {
+            :root {
+                --sidebar-width: 250px;
+            }
+
             .header-container {
                 padding: 0 1.5rem;
             }
@@ -395,8 +681,35 @@
         }
 
         @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 0;
+            }
+
+            body {
+                font-family: 'Segoe UI', 'Roboto', sans-serif;
+                background-color: var(--light-bg);
+                color: var(--dark-text);
+                line-height: 1.7;
+                padding-top: 0;
+                margin: 0; /* Убираем margin-left, так как сайдбар fixed */
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-header, .main-footer {
+                margin-left: 0;
+                width: 100%;
+            }
+
             .logo span {
-                font-size: 1.4rem;
+                flex-shrink: 0;
+                margin-right: 30px;
             }
 
             .header-container {
@@ -413,16 +726,20 @@
 
             .user-info {
                 text-align: center;
+                margin-left: 0;
             }
 
             .main-content {
-                padding: 0 1rem;
-                margin: 2rem auto;
+                width: 100%;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                box-sizing: border-box;
             }
 
             .content-card {
-                padding: 1.8rem 1.5rem;
-                border-radius: 14px;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             h1 {
@@ -432,26 +749,168 @@
             h2 {
                 font-size: 1.8rem;
             }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu-btn {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Боковое меню -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">
+                <i class="bi bi-journal-check"></i>
+                <span>ИПК Вступительные испытания</span>
+            </h3>
+        </div>
+        <nav class="sidebar-menu">
+            {% if current_user.is_authenticated %}
+                <!-- Основное меню -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Основное</div>
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('routes.admin_dashboard') }}" class="menu-item {% if request.endpoint == 'routes.admin_dashboard' %}active{% endif %}">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Панель управления</span>
+                        </a>
+                    {% elif current_user.role == 'secretary' %}
+                        <a href="{{ url_for('routes.secretary_dashboard') }}" class="menu-item {% if request.endpoint == 'routes.secretary_dashboard' %}active{% endif %}">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Панель секретаря</span>
+                        </a>
+                    {% elif current_user.role == 'teacher' %}
+                        <a href="{{ url_for('routes.teacher_dashboard') }}" class="menu-item {% if request.endpoint == 'routes.teacher_dashboard' %}active{% endif %}">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Панель преподавателя</span>
+                        </a>
+                    {% elif current_user.role == 'student' %}
+                        <a href="{{ url_for('routes.student_dashboard') }}" class="menu-item {% if request.endpoint == 'routes.student_dashboard' %}active{% endif %}">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Мои тесты</span>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Администрирование (для админов и секретарей) -->
+                {% if current_user.role in ['admin', 'secretary'] %}
+                <div class="menu-section">
+                    <div class="menu-section-title">Управление</div>
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('routes.engineering_schools') }}" class="menu-item {% if request.endpoint == 'routes.engineering_schools' %}active{% endif %}">
+                            <i class="bi bi-building"></i>
+                            <span>Инженерные школы</span>
+                        </a>
+                        <a href="{{ url_for('routes.users') }}" class="menu-item {% if request.endpoint == 'routes.users' %}active{% endif %}">
+                            <i class="bi bi-person-gear"></i>
+                            <span>Пользователи</span>
+                        </a>
+                    {% endif %}
+
+                    <a href="{{ url_for('routes.programs') }}" class="menu-item {% if request.endpoint == 'routes.programs' %}active{% endif %}">
+                        <i class="bi bi-journal-bookmark"></i>
+                        <span>Программы</span>
+                    </a>
+                    <a href="{{ url_for('routes.exam_dates') }}" class="menu-item {% if request.endpoint == 'routes.exam_dates' %}active{% endif %}">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Даты экзаменов</span>
+                    </a>
+                    <a href="{{ url_for('routes.applicants') }}" class="menu-item {% if request.endpoint == 'routes.applicants' %}active{% endif %}">
+                        <i class="bi bi-people"></i>
+                        <span>Абитуриенты</span>
+                    </a>
+                    <a href="{{ url_for('routes.standard_commission') }}" class="menu-item {% if request.endpoint == 'routes.standard_commission' %}active{% endif %}">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Комиссии</span>
+                    </a>
+                    <a href="{{ url_for('routes.questions') }}" class="menu-item {% if request.endpoint == 'routes.questions' %}active{% endif %}">
+                        <i class="bi bi-question-circle"></i>
+                        <span>Вопросы</span>
+                    </a>
+                    <a href="{{ url_for('routes.upload_schedule') }}" class="menu-item {% if request.endpoint == 'routes.upload_schedule' %}active{% endif %}">
+                        <i class="bi bi-upload"></i>
+                        <span>Загрузка данных</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Для преподавателей -->
+                {% if current_user.role == 'teacher' %}
+                <div class="menu-section">
+                    <div class="menu-section-title">Преподавание</div>
+                    <a href="{{ url_for('routes.manage_questions') }}" class="menu-item {% if request.endpoint == 'routes.manage_questions' %}active{% endif %}">
+                        <i class="bi bi-question-circle"></i>
+                        <span>Вопросы</span>
+                    </a>
+                    <a href="{{ url_for('routes.view_results') }}" class="menu-item {% if request.endpoint == 'routes.view_results' %}active{% endif %}">
+                        <i class="bi bi-clipboard-data"></i>
+                        <span>Результаты</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Для студентов -->
+                {% if current_user.role == 'student' %}
+                <div class="menu-section">
+                    <div class="menu-section-title">Тестирование</div>
+                    <a href="{{ url_for('routes.test_history') }}" class="menu-item {% if request.endpoint == 'routes.test_history' %}active{% endif %}">
+                        <i class="bi bi-clock-history"></i>
+                        <span>История тестов</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Общие пункты -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Аккаунт</div>
+                    <a href="{{ url_for('routes.logout') }}" class="menu-item">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Выход</span>
+                    </a>
+                </div>
+
+            {% else %}
+                <!-- Меню для неавторизованных пользователей -->
+                <div class="menu-section">
+                    <a href="{{ url_for('routes.login') }}" class="menu-item">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Вход</span>
+                </div>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <!-- Кнопка мобильного меню -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Основной контент -->
     <header class="main-header">
         <div class="header-container">
             <div class="header-left">
-                <!-- Кнопка "Назад" -->
                 {% if current_user.is_authenticated %}
-                <a href="javascript:history.back()" class="back-btn">
-                    <i class="bi bi-arrow-left-circle"></i>
-                </a>
+                    <div class="header-left">
+                        <button class="toggle-sidebar-btn">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <a href="javascript:history.back()" class="back-btn">
+                            <i class="bi bi-arrow-left-circle"></i>
+                        </a>
+                        <a href="{{ url_for('routes.home') }}" class="logo">
+                            <i class="bi bi-journal-check"></i>
+                            <span>Система оценки</span>
+                        </a>
+                    </div>
                 {% endif %}
-                
-                <!-- Логотип -->
-                <a href="{{ url_for('routes.home') }}" class="logo">
-                    <i class="bi bi-journal-check"></i>
-                    <span>Система оценки вступительных испытаний</span>
-                </a>
-            </div>
 
             <nav class="user-nav">
                 {% if current_user.is_authenticated %}
@@ -459,10 +918,6 @@
                     <div class="user-name">{{ current_user.full_name }}</div>
                     <div class="user-role">{{ current_user.role }}</div>
                 </div>
-                <a href="{{ url_for('routes.logout') }}" class="outline-btn">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Выйти</span>
-                </a>
                 {% else %}
                 <a href="{{ url_for('routes.login') }}" class="outline-btn">
                     <i class="bi bi-box-arrow-in-right"></i>
@@ -474,6 +929,7 @@
     </header>
 
     <main class="main-content">
+        <!-- Flash сообщения -->
         <div class="flash-messages">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -487,14 +943,29 @@
             {% endwith %}
         </div>
 
+        <!-- Основной контент страницы -->
+        {% block content %}
         <div class="content-card">
-            {% block content %}{% endblock %}
+            <div class="content-card-header">
+                <h1>{% block title %}Добро пожаловать{% endblock %}</h1>
+                <p class="lead text-muted">{% block subtitle %}Система оценки вступительных испытаний{% endblock %}</p>
+            </div>
+            {% block page_content %}{% endblock %}
         </div>
+        {% endblock %}
     </main>
 
     <footer class="main-footer">
         <div class="footer-content">
-            &copy; 2025 Система оценки вступительных испытаний
+            <div class="footer-links">
+                <a href="#" class="footer-link">О системе</a>
+                <a href="#" class="footer-link">Контакты</a>
+                <a href="#" class="footer-link">Помощь</a>
+                <a href="#" class="footer-link">Документация</a>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2025 Система оценки вступительных испытаний. Все права защищены.
+            </div>
         </div>
     </footer>
 
@@ -503,74 +974,58 @@
 
     <!-- Кастомные скрипты -->
     <script>
-        // Инициализация компонентов Bootstrap
+        // Мобильное меню
         document.addEventListener('DOMContentLoaded', function() {
-            // Анимация элементов при загрузке
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.querySelector('.sidebar');
+
+            if (mobileMenuBtn && sidebar) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+
+                // Закрытие меню при клике вне его
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && e.target !== mobileMenuBtn) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            }
+
+            // Плавное появление контента
             document.querySelectorAll('.content-card, .flash').forEach(el => {
                 el.style.opacity = '0';
                 el.style.transform = 'translateY(20px)';
-                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            });
+                el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
 
-            setTimeout(() => {
-                document.querySelectorAll('.content-card, .flash').forEach(el => {
+                setTimeout(() => {
                     el.style.opacity = '1';
                     el.style.transform = 'translateY(0)';
-                });
-            }, 100);
-
-            // Плавная прокрутка
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                });
+                }, 100);
             });
-
-            if(document.querySelector('.modal-backdrop') && !document.querySelector('.modal.show')) {
-                document.querySelector('.modal-backdrop').remove();
-                document.body.classList.remove('modal-open');
-                document.body.style.overflow = 'auto';
-            }
-        
-            // Добавляем кнопку экстренного закрытия
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && document.querySelector('.modal-backdrop')) {
-                    document.querySelector('.modal-backdrop').remove();
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = 'auto';
-                }
-            });
-
-
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-                document.body.classList.remove('modal-open');
-                document.body.style.overflow = 'auto';
-            }
-            
-            // Плавная прокрутка к форме
-            if (window.location.hash === '#addQuestionForm') {
-                const formElement = document.getElementById('addQuestionForm');
-                if (formElement) {
-                    formElement.scrollIntoView({ behavior: 'smooth' });
-                    formElement.style.animation = 'highlight 2s ease';
-                }
-            }
-            
         });
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes highlight {
-                0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
-                50% { box-shadow: 0 0 0 15px rgba(46, 125, 50, 0); }
-                100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+
+            document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('collapsed');
+                document.body.classList.toggle('sidebar-collapsed');
+
+                // Сохраняем состояние
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            });
+
+            // Восстанавливаем состояние при загрузке
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.querySelector('.sidebar').classList.add('collapsed');
+                document.body.classList.add('sidebar-collapsed');
             }
-        `;
-        document.head.appendChild(style);
+
+            // Для мобильного меню
+            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
     </script>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>
