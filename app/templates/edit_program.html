@@ -38,6 +38,16 @@
                     {{ form.school_id(class="custom-form-control form-select") }}
                 </div>
 
+                <!-- Исправленное поле для ООП -->
+                <div class="col-12">
+                    <label class="form-label">Название ООП</label>
+                    <input type="text" 
+                           name="oop" 
+                           class="custom-form-control form-control" 
+                           placeholder="Введите название образовательной программы"
+                           value="{{ form.oop.data if form.oop.data else '' }}">
+                </div>
+
                 <div class="col-12 d-flex justify-content-end gap-3 mt-4">
                     <a href="{{ url_for('routes.programs') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-x-lg me-1"></i> Отмена

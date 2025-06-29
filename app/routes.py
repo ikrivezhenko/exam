@@ -4,7 +4,7 @@ import re
 from flask import render_template, redirect, send_from_directory, url_for, flash, request, send_file, abort, Blueprint, current_app
 from flask_login import login_user, logout_user, current_user, login_required
 from . import db, bcrypt
-from .models import (User, Program, ExamDate, CommissionMember, Applicant, 
+from .models import (Oop, User, Program, ExamDate, CommissionMember, Applicant, 
                     Question, Score, StandardCommission, EngineeringSchool)
 from .forms import (LoginForm, EngineeringSchoolForm, ProgramForm, ExamDateForm, 
                    AssignCommissionForm, ApplicantForm, ScoreForm, UserForm, 
@@ -259,14 +259,33 @@ def edit_program(program_id):
                                   s.id == current_user.school_id]
     else:
         form.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.order_by('name').all()]
+    
+    # Заполняем значение ООП
+    if program.oop:
+        form.oop.data = program.oop[0].name  # Берем первое ООП
+
     if form.validate_on_submit():
-        form.populate_obj(program)
+        # Обновляем основные поля
+        program.code = form.code.data
+        program.name = form.name.data
+        program.school_id = form.school_id.data
+        
+        # Обновляем ООП
+        oop_name = form.oop.data
+        if program.oop:
+            # Обновляем существующее ООП
+            oop = program.oop[0]
+            oop.name = oop_name
+        else:
+            # Создаем новое ООП
+            oop = Oop(name=oop_name, program_id=program.id)
+            db.session.add(oop)
+            
         db.session.commit()
         flash('Направление успешно обновлено', 'success')
         return redirect(url_for('routes.programs'))
 
     return render_template('edit_program.html', form=form, program=program)
-
 
 # Назначение комиссии
 @routes.route('/assign_commission/<int:exam_date_id>', methods=['GET', 'POST'])
