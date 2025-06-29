@@ -18,15 +18,7 @@ class User(UserMixin, db.Model):
     commission_members = db.relationship('CommissionMember', back_populates='user', cascade='all, delete-orphan')
     standard_commissions = db.relationship('StandardCommission', back_populates='user', cascade='all, delete-orphan')
 
-class Program(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(50), nullable=False)
-    name = db.Column(db.String(200), nullable=False)
-    school_id = db.Column(db.Integer, db.ForeignKey('engineering_school.id'))
-    questions = db.relationship('Question', backref='program', lazy=True, cascade='all, delete-orphan')
-    standard_commission = db.relationship('StandardCommission', backref='program', lazy=True, cascade='all, delete-orphan')
-    applicants = db.relationship('Applicant', backref='program', lazy=True)
-    exam_dates = db.relationship('ExamDate', backref='program', lazy=True)
+
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -67,3 +59,22 @@ class Score(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     question = db.relationship('Question')
+
+
+
+class Program(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    school_id = db.Column(db.Integer, db.ForeignKey('engineering_school.id'))
+    questions = db.relationship('Question', backref='program', lazy=True, cascade='all, delete-orphan')
+    standard_commission = db.relationship('StandardCommission', backref='program', lazy=True, cascade='all, delete-orphan')
+    applicants = db.relationship('Applicant', backref='program', lazy=True)
+    exam_dates = db.relationship('ExamDate', backref='program', lazy=True)
+    oop = db.relationship("Oop", backref='program', lazy=True)
+
+
+class Oop(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), nullable=False)
+    program_id = db.Column(db.Integer, db.ForeignKey('program.id'), nullable=False)

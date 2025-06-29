@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -37,6 +36,11 @@
                     {{ form.name(class="custom-form-control form-control", placeholder="Полное название направления") }}
                 </div>
 
+                <div class="col-md-5">
+                    <label class="form-label">ООП</label>
+                    {{ form.oop(class="custom-form-control form-control", placeholder="Полное название ООП") }}
+                </div>
+
                 <div class="col-md-3">
                     <label class="form-label">Инженерная школа</label>
                     {{ form.school_id(class="custom-form-control form-select") }}
@@ -69,6 +73,7 @@
                             <th class="ps-4">Код</th>
                             <th>Название</th>
                             <th>Инженерная школа</th>
+                            <th>Название ООП</th>
                             <th class="text-center">Вопросы</th>
                             <th class="text-center">Абитуриенты</th>
                             <th class="text-end pe-4">Действия</th>
@@ -82,6 +87,13 @@
                             <td>
                                 {% if program.school %}
                                 <span class="badge bg-light text-dark">{{ program.school.name }}</span>
+                                {% else %}
+                                <span class="text-muted">Не указана</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if program.oop %}
+                                <span class="badge bg-light text-dark">{{ program.oop[0].name }}</span>
                                 {% else %}
                                 <span class="text-muted">Не указана</span>
                                 {% endif %}

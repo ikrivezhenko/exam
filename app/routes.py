@@ -15,6 +15,7 @@ from datetime import datetime, date
 import os
 from io import BytesIO
 from werkzeug.utils import secure_filename
+from sqlalchemy.orm import joinedload
 
 routes = Blueprint('routes', __name__)
 
@@ -152,15 +153,19 @@ def programs():
         )
         db.session.add(program)
         db.session.commit()
+
+        oop = Oop(name=form.oop.data, program_id=program.id)
+        db.session.add(oop)
+        db.session.commit()
         flash('Программа добавлена')
         return redirect(url_for('routes.programs'))
-    
+
     # Фильтрация программ
     if current_user.role == 'secretary':
-        programs = Program.query.filter_by(school_id=current_user.school_id).all()
+        programs = Program.query.options(joinedload(Program.oop)).filter_by(school_id=current_user.school_id).all()
     else:  # admin
-        programs = Program.query.all()
-    
+        programs = Program.query.options(joinedload(Program.oop)).all()
+
     return render_template('programs.html', form=form, programs=programs)
 
 @routes.route('/delete_program/<int:program_id>', methods=['POST'])

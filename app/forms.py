@@ -125,3 +125,13 @@ class UploadApplicantsForm(FlaskForm):
 class UploadScheduleForm(FlaskForm):
     file = FileField('Файл с расписанием (CSV или Excel)', validators=[FileRequired()])
     submit = SubmitField('Загрузить')
+
+class ProgramForm(FlaskForm):
+    code = StringField('Код программы', validators=[DataRequired(), Length(min=2, max=50)])
+    name = StringField('Название программы', validators=[DataRequired(), Length(min=5, max=200)])
+    oop = StringField("Название ООП", validators=[DataRequired(), Length(min=5, max=200)])
+    school_id = SelectField('Инженерная школа', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Добавить')
+
+    def __init__(self, *args, **kwargs):
+        super(ProgramForm, self).__init__(*args, **kwargs)
