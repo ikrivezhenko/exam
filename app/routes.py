@@ -201,9 +201,15 @@ def exam_dates():
         db.session.commit()
         flash('Дата экзамена добавлена')
         return redirect(url_for('routes.exam_dates'))
-    
-    exam_dates = ExamDate.query.all()
+    if current_user.role == 'secretary':
+        exam_dates = ExamDate.query \
+            .join(Program) \
+            .filter(Program.school_id == current_user.school_id) \
+            .all()
+    else:
+        exam_dates = ExamDate.query.all()
     return render_template('exam_dates.html', form=form, exam_dates=exam_dates)
+
 
 # Назначение комиссии
 @routes.route('/assign_commission/<int:exam_date_id>', methods=['GET', 'POST'])
