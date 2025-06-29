@@ -403,7 +403,7 @@ def delete_applicant(applicant_id):
 
     # Удаляем связанные данные (если нужно)
     Score.query.filter_by(applicant_id=applicant_id).delete()
-    ExamDate.query.filter_by(applicant_id=applicant_id).delete()
+    # ExamDate.query.filter_by(applicant_id=applicant_id).delete()
 
     # Удаляем абитуриента
     db.session.delete(applicant)
@@ -411,6 +411,8 @@ def delete_applicant(applicant_id):
 
     flash('Абитуриент успешно удален', 'success')
     return redirect(url_for('routes.applicants'))
+
+    
 
 
 # Генерация протокола
