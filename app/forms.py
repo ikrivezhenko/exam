@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField, IntegerField, TextAreaField
-from wtforms.validators import DataRequired, Length, ValidationError, Optional
+from wtforms.validators import DataRequired, Length, ValidationError, Optional, InputRequired
 from .models import Program, User, EngineeringSchool
 from datetime import date
 from flask_wtf.file import FileField, FileRequired
@@ -66,8 +66,9 @@ class EditApplicantForm(ApplicantForm):
         super(EditApplicantForm, self).__init__(*args, **kwargs)
 class ScoreForm(FlaskForm):
     question_id = SelectField('Вопрос', coerce=int, validators=[DataRequired()])
-    score = IntegerField('Балл', validators=[DataRequired()])
+    score = IntegerField('Балл', validators=[InputRequired()])
     submit = SubmitField('Добавить')
+
 
 class UserForm(FlaskForm):
     username = StringField('Логин', validators=[DataRequired(), Length(min=3, max=80)])
@@ -102,9 +103,11 @@ class StandardCommissionForm(FlaskForm):
         self.program_id.choices = [(p.id, f"{p.code} {p.name}") for p in Program.query.all()]
         self.user_id.choices = [(u.id, u.full_name) for u in User.query.filter(User.role.in_(['commission', 'secretary', 'admin'])).all()]
 
+
 class EditScoreForm(FlaskForm):
-    score = IntegerField('Балл', validators=[DataRequired()])
+    score = IntegerField('Балл', validators=[InputRequired()])
     submit = SubmitField('Обновить')
+
 
 class QuestionForm(FlaskForm):
     text = TextAreaField('Текст вопроса', validators=[DataRequired()])
