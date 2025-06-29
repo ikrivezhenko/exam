@@ -378,16 +378,42 @@ def assign_applicants(exam_date_id):
         abort(403)
     
     if request.method == 'POST':
-        applicant_ids = request.form.getlist('applicant_ids')
-        for applicant_id in applicant_ids:
-            applicant = Applicant.query.get(applicant_id)
-            applicant.exam_date_id = exam_date_id
+        # Обработка назначения новых абитуриентов
+        if 'assign_ids' in request.form:
+            assign_ids = request.form.getlist('assign_ids')
+            for applicant_id in assign_ids:
+                applicant = Applicant.query.get(applicant_id)
+                applicant.exam_date_id = exam_date_id
+            flash(f'Назначено {len(assign_ids)} абитуриентов', 'success')
+        
+        # Обработка снятия назначения
+        if 'unassign_ids' in request.form:
+            unassign_ids = request.form.getlist('unassign_ids')
+            for applicant_id in unassign_ids:
+                applicant = Applicant.query.get(applicant_id)
+                applicant.exam_date_id = None
+            flash(f'Снято {len(unassign_ids)} абитуриентов', 'info')
+        
         db.session.commit()
-        flash('Абитуриенты назначены')
         return redirect(url_for('routes.assign_applicants', exam_date_id=exam_date_id))
     
-    applicants = Applicant.query.filter_by(program_id=program_id, exam_date_id=None).all()
-    return render_template('assign_applicants.html', exam_date=exam_date, applicants=applicants)
+    # Получаем оба списка абитуриентов
+    assigned_applicants = Applicant.query.filter_by(
+        program_id=program_id, 
+        exam_date_id=exam_date_id
+    ).all()
+    
+    unassigned_applicants = Applicant.query.filter_by(
+        program_id=program_id, 
+        exam_date_id=None
+    ).all()
+    
+    return render_template(
+        'assign_applicants.html', 
+        exam_date=exam_date, 
+        assigned_applicants=assigned_applicants,
+        unassigned_applicants=unassigned_applicants
+    )
 
 # Выставление баллов
 @routes.route('/enter_scores')

@@ -5,29 +5,30 @@
     <h1>Назначение абитуриентов на {{ exam_date.date.strftime('%d.%m.%Y') }}</h1>
     <p class="lead">Программа: <strong>{{ exam_date.program.code }} {{ exam_date.program.name }}</strong></p>
 
-    <div class="card-elegant">
-        <div class="card-header-elegant">
-            <h2><i class="bi bi-person-plus"></i> Абитуриенты без назначенной даты экзамена</h2>
-        </div>
-        <div class="card-body">
-            <form method="POST">
-                {% if applicants %}
+    <form method="POST">
+        <!-- Секция назначенных абитуриентов -->
+        <div class="card-elegant mb-4">
+            <div class="card-header-elegant">
+                <h2><i class="bi bi-person-check"></i> Абитуриенты назначенные на экзамен</h2>
+            </div>
+            <div class="card-body">
+                {% if assigned_applicants %}
                 <div class="table-responsive">
                     <table class="elegant-table">
                         <thead>
                             <tr>
-                                <th width="50px">Выбрать</th>
+                                <th width="50px">Снять</th>
                                 <th>ФИО</th>
                                 <th>Программа</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for applicant in applicants %}
+                            {% for applicant in assigned_applicants %}
                             <tr>
                                 <td>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox"
-                                               name="applicant_ids" value="{{ applicant.id }}">
+                                               name="unassign_ids" value="{{ applicant.id }}">
                                     </div>
                                 </td>
                                 <td>{{ applicant.full_name }}</td>
@@ -37,16 +38,101 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="submit" class="btn btn-primary-elegant mt-4 w-100">
-                    <i class="bi bi-calendar-check"></i> Назначить выбранных
-                </button>
+                {% else %}
+                <div class="alert alert-light text-center">
+                    <i class="bi bi-info-circle"></i> Нет назначенных абитуриентов
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Секция неназначенных абитуриентов -->
+        <div class="card-elegant">
+            <div class="card-header-elegant">
+                <h2><i class="bi bi-person-plus"></i> Абитуриенты без назначенной даты экзамена</h2>
+            </div>
+            <div class="card-body">
+                {% if unassigned_applicants %}
+                <div class="table-responsive">
+                    <table class="elegant-table">
+                        <thead>
+                            <tr>
+                                <th width="50px">Назначить</th>
+                                <th>ФИО</th>
+                                <th>Программа</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for applicant in unassigned_applicants %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="assign_ids" value="{{ applicant.id }}">
+                                    </div>
+                                </td>
+                                <td>{{ applicant.full_name }}</td>
+                                <td>{{ applicant.program.code }} {{ applicant.program.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
                 <div class="alert alert-light text-center">
                     <i class="bi bi-check-circle"></i> Нет доступных абитуриентов для назначения
                 </div>
                 {% endif %}
-            </form>
+            </div>
         </div>
-    </div>
+
+        {% if assigned_applicants or unassigned_applicants %}
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary-elegant w-100">
+                <i class="bi bi-save"></i> Сохранить изменения
+            </button>
+        </div>
+        {% endif %}
+    </form>
 </div>
+
+<style>
+    .card-elegant {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .card-header-elegant {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .elegant-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .elegant-table th, .elegant-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .elegant-table th {
+        background-color: #4676a5;
+        font-weight: 600;
+    }
+    
+    .form-check-input {
+        margin-top: 0;
+    }
+</style>
 {% endblock %}
