@@ -211,6 +211,30 @@ def exam_dates():
     return render_template('exam_dates.html', form=form, exam_dates=exam_dates)
 
 
+
+@routes.route('/edit_program/<int:program_id>', methods=['GET', 'POST'])
+@login_required
+def edit_program(program_id):
+    if current_user.role not in ['admin', 'secretary']:
+        abort(403)
+    program = Program.query.get_or_404(program_id)
+    form = ProgramForm(obj=program)
+
+    # Заполняем список школ
+    if current_user.role == 'secretary':
+        form.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.order_by('name').all() if
+                                  s.id == current_user.school_id]
+    else:
+        form.school_id.choices = [(s.id, s.name) for s in EngineeringSchool.query.order_by('name').all()]
+    if form.validate_on_submit():
+        form.populate_obj(program)
+        db.session.commit()
+        flash('Направление успешно обновлено', 'success')
+        return redirect(url_for('routes.programs'))
+
+    return render_template('edit_program.html', form=form, program=program)
+
+
 # Назначение комиссии
 @routes.route('/assign_commission/<int:exam_date_id>', methods=['GET', 'POST'])
 @login_required

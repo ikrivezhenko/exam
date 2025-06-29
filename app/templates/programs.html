@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -50,7 +51,7 @@
         </div>
     </div>
 
-    <!-- Карточка списка -->
+        <!-- Карточка списка -->
     <div class="custom-card">
         <div class="custom-card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0">
@@ -58,6 +59,7 @@
             </h3>
             <span class="badge badge-custom">{{ programs|length }} направлений</span>
         </div>
+
 
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -88,6 +90,13 @@
                             <td class="text-center">{{ program.applicants|length }}</td>
                             <td class="text-end pe-4">
                                 <div class="btn-group">
+                                    <!-- Кнопка редактирования -->
+                                    <a href="{{ url_for('routes.edit_program', program_id=program.id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <!-- Кнопка удаления -->
                                     <form action="{{ url_for('routes.delete_program', program_id=program.id) }}" method="POST">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Удалить направление? Все связанные данные будут потеряны!')">
