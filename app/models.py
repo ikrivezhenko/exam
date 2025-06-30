@@ -29,8 +29,8 @@ class ExamDate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
     program_id = db.Column(db.Integer, db.ForeignKey('program.id'), nullable=False)
-    commission = db.relationship('CommissionMember', backref='exam_date', lazy=True, cascade='all, delete-orphan')
-    applicants = db.relationship('Applicant', backref='exam_date', lazy=True)
+    commission = db.relationship('CommissionMember', backref='exam_date', lazy=True, cascade='all, delete-orphan')  # Каскад
+    applicants = db.relationship('Applicant', backref='exam_date', lazy=True,cascade='all, delete-orphan',passive_deletes=True)  # Обрабатывается отдельно
 
 class CommissionMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -69,8 +69,8 @@ class Program(db.Model):
     school_id = db.Column(db.Integer, db.ForeignKey('engineering_school.id'))
     questions = db.relationship('Question', backref='program', lazy=True, cascade='all, delete-orphan')
     standard_commission = db.relationship('StandardCommission', backref='program', lazy=True, cascade='all, delete-orphan')
-    applicants = db.relationship('Applicant', backref='program', lazy=True)
-    exam_dates = db.relationship('ExamDate', backref='program', lazy=True)
+    applicants = db.relationship('Applicant', backref='program', lazy=True, cascade='all, delete-orphan', passive_deletes=True)
+    exam_dates = db.relationship('ExamDate', backref='program', lazy=True, cascade='all, delete-orphan',passive_deletes=True)
     oop = db.relationship("Oop", backref='program', lazy=True, cascade='all, delete-orphan')  # Важно: cascade
 
 class Oop(db.Model):

@@ -177,9 +177,18 @@ def delete_program(program_id):
         abort(403)
     
     program = Program.query.get_or_404(program_id)
+    
+    # Сначала удаляем всех абитуриентов программы
+    Applicant.query.filter_by(program_id=program_id).delete()
+    
+    # Удаляем связанные даты экзаменов
+    ExamDate.query.filter_by(program_id=program_id).delete()
+    
+    # Теперь можно безопасно удалить программу
     db.session.delete(program)
     db.session.commit()
-    flash('Программа удалена')
+    
+    flash('Программа удалена', 'success')
     return redirect(url_for('routes.programs'))
 
 # Управление датами экзаменов
