@@ -339,17 +339,21 @@ def delete_commission_member(member_id):
 def applicants():
     if current_user.role not in ['admin', 'secretary']:
         abort(403)
-    
+
     form = ApplicantForm()
     upload_form = UploadApplicantsForm()
-    
-    # Фильтрация программ для секретаря
+
+    # Базовый запрос для программ с учетом прав доступа
+    program_query = Program.query
     if current_user.role == 'secretary':
-        form.program_id.choices = [
-            (p.id, f"{p.code} {p.name}") 
-            for p in Program.query.filter_by(school_id=current_user.school_id)
-        ]
-    
+        program_query = program_query.filter_by(school_id=current_user.school_id)
+
+    # Заполняем выбор программ в форме
+    form.program_id.choices = [
+        (p.id, f"{p.code} {p.name}")
+        for p in program_query.order_by(Program.code)
+    ]
+
     if form.validate_on_submit():
         applicant = Applicant(
             full_name=form.full_name.data,
@@ -357,19 +361,47 @@ def applicants():
         )
         db.session.add(applicant)
         db.session.commit()
-        flash('Абитуриент добавлен')
+        flash('Абитуриент добавлен', 'success')
         return redirect(url_for('routes.applicants'))
-    
-    # Фильтрация абитуриентов
-    if current_user.role == 'secretary':
-        applicants = Applicant.query.join(Program).filter(
-            Program.school_id == current_user.school_id
-        ).order_by(Applicant.id.desc()).all()  # Сортировка по ID в обратном порядке
-    else:
-        applicants = Applicant.query.order_by(Applicant.id.desc()).all()
-    
-    return render_template('applicants.html', form=form, upload_form=upload_form, applicants=applicants)
 
+    # Получаем программы с абитуриентами с учетом прав доступа
+    programs_with_applicants_query = program_query.options(
+        db.joinedload(Program.applicants)
+    ).order_by(Program.code)
+
+    if current_user.role == 'secretary':
+        # Для секретаря - только программы его школы
+        programs_with_applicants = [
+            p for p in programs_with_applicants_query.all()
+            if p.applicants
+        ]
+    else:
+        # Для админа - все программы с абитуриентами
+        programs_with_applicants = [
+            p for p in programs_with_applicants_query.all()
+            if p.applicants
+        ]
+
+    # Сортируем абитуриентов внутри каждой программы по ФИО
+    for program in programs_with_applicants:
+        program.applicants.sort(key=lambda x: x.full_name)
+
+    # Сохраняем исходный плоский список абитуриентов для совместимости
+    applicants_flat = Applicant.query
+    if current_user.role == 'secretary':
+        applicants_flat = applicants_flat.join(Program).filter(
+            Program.school_id == current_user.school_id
+        )
+    applicants_flat = applicants_flat.order_by(Applicant.id.desc()).all()
+
+    return render_template(
+        'applicants.html',
+        form=form,
+        upload_form=upload_form,
+        applicants=applicants_flat,  # для обратной совместимости
+        programs_with_applicants=programs_with_applicants,  # для группировки
+        current_user=current_user
+    )
 
 # Добавляем новый обработчик для удаления экзамена
 @routes.route('/delete_exam_date/<int:exam_date_id>', methods=['POST'])

@@ -1,115 +1,484 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="spacer-lg">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <h1>Управление абитуриентами</h1>
+<div class="applicants-container">
+    <!-- Заголовок -->
+    <div class="page-header">
+        <h1>
+            <i class="bi bi-people-fill"></i>
+            Управление абитуриентами
+        </h1>
     </div>
 
-    <div class="card-elegant mb-5" id="addApplicantForm">
-        <div class="card-header-elegant">
-            <h2><i class="bi bi-person-plus"></i> Добавить нового абитуриента</h2>
+    <!-- Форма добавления -->
+    <div class="add-applicant-card">
+        <div class="card-header">
+            <h2>
+                <i class="bi bi-person-plus"></i>
+                Добавить нового абитуриента
+            </h2>
         </div>
         <div class="card-body">
             <form method="POST">
                 {{ form.hidden_tag() }}
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            {{ form.full_name(class="form-control-elegant", placeholder="ФИО абитуриента") }}
-                        </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name">
+                            <i class="bi bi-person-badge"></i>
+                            ФИО абитуриента
+                        </label>
+                        {{ form.full_name(class="form-control", placeholder="Иванов Иван Иванович") }}
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            {{ form.program_id(class="form-control-elegant form-select") }}
-                            <label>Образовательная программа</label>
-                        </div>
+                    <div class="form-group">
+                        <label for="program_id">
+                            <i class="bi bi-book"></i>
+                            Образовательная программа
+                        </label>
+                        {{ form.program_id(class="form-control form-select") }}
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary-elegant h-100 w-100">
-                            <i class="bi bi-plus-lg"></i> Добавить
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-add">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Добавить</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="card-elegant">
-        <div class="card-header-elegant">
-            <h2><i class="bi bi-list"></i> Список абитуриентов</h2>
+    <!-- Список абитуриентов с группировкой -->
+    <div class="applicants-list-card">
+        <div class="card-header">
+            <h2>
+                <i class="bi bi-list-ul"></i>
+                Список абитуриентов
+            </h2>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="elegant-table">
-                    <thead>
-                        <tr>
-                            <th>ФИО</th>
-                            <th>Программа</th>
-                            <th>Дата экзамена</th>
-                            <th class="text-end">Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for applicant in applicants %}
-                        <tr class="{% if applicant.exam_date and not applicant.scores %}bg-warning bg-opacity-10{% endif %}">
-                            <td class="fw-bold">{{ applicant.full_name }}</td>
-                            <td>{{ applicant.program.code }} {{ applicant.program.name }}</td>
-                            <td>
-                                {% if applicant.exam_date %}
-                                    <span class="badge bg-primary">
-                                        {{ applicant.exam_date.date.strftime('%d.%m.%Y') }}
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Не назначена</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-end">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <!-- Кнопка редактирования -->
-                                    <a href="{{ url_for('routes.edit_applicant', applicant_id=applicant.id) }}"
-                                       class="btn btn-outline-elegant btn-sm">
-                                        <i class="bi bi-pencil"></i> Редактировать
-                                    </a>
-
-                                    <!-- Кнопка удаления с подтверждением -->
-                                    <form action="{{ url_for('routes.delete_applicant', applicant_id=applicant.id) }}" method="POST">
-                                        {{ form.hidden_tag() }}
-                                        <button type="submit" class="btn btn-outline-danger btn-sm"
-                                                onclick="return confirm('Вы уверены, что хотите удалить этого абитуриента?')">
-                                            <i class="bi bi-trash"></i> Удалить
-                                        </button>
-                                    </form>
-
-                                    <!-- Существующие кнопки баллов и протокола -->
-                                    {% if applicant.exam_date %}
-                                    <div class="btn-group">
-                                        <a href="{{ url_for('routes.applicant_scores', applicant_id=applicant.id) }}"
-                                           class="btn btn-outline-elegant btn-sm">
-                                            <i class="bi bi-pencil"></i> Баллы
-                                        </a>
-                                        <a href="{{ url_for('routes.view_protocol', applicant_id=applicant.id) }}"
-                                           class="btn btn-outline-elegant btn-sm">
-                                            <i class="bi bi-file-earmark-text"></i> Протокол
-                                        </a>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center py-4">
-                                <div class="alert alert-light">
-                                    <i class="bi bi-info-circle"></i> Нет абитуриентов
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            {% if applicants %}
+                {% for program in programs_with_applicants %}
+                <div class="program-group">
+                    <h3 class="program-title">
+                        {{ program.code }} {{ program.name }}
+                        <small class="program-oop">{{ program.oop[0].name }}</small>
+                    </h3>
+                    <div class="table-responsive">
+                        <table class="applicants-table">
+                            <thead>
+                                <tr>
+                                    <th>ФИО</th>
+                                    <th>Дата экзамена</th>
+                                    <th>Баллы</th>  <!-- Новый столбец -->
+                                    <th class="actions-header">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for applicant in program.applicants %}
+                                <tr class="{% if applicant.exam_date and not applicant.scores %}warning-row{% endif %}">
+                                    <td class="applicant-name">{{ applicant.full_name }}</td>
+                                    <td class="exam-date">
+                                        {% if applicant.exam_date %}
+                                            <span class="badge exam-badge">
+                                                {{ applicant.exam_date.date.strftime('%d.%m.%Y') }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge no-exam-badge">Не назначена</span>
+                                        {% endif %}
+                                    <td class="scores">
+                                        {% if applicant.scores %}
+                                            {% set total_score = applicant.scores | sum(attribute='score') %}
+                                            <span class="badge score-badge">{{ total_score }}</span>
+                                        {% else %}
+                                            <span class="badge no-scores-badge"></span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="actions">
+                                        <div class="actions-group">
+                                            <a href="{{ url_for('routes.edit_applicant', applicant_id=applicant.id) }}"
+                                               class="btn btn-edit" title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form action="{{ url_for('routes.delete_applicant', applicant_id=applicant.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-delete" title="Удалить"
+                                                        onclick="return confirm('Вы уверены?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                            {% if applicant.exam_date %}
+                                            <a href="{{ url_for('routes.applicant_scores', applicant_id=applicant.id) }}"
+                                               class="btn btn-scores" title="Баллы">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <a href="{{ url_for('routes.view_protocol', applicant_id=applicant.id) }}"
+                                               class="btn btn-protocol" title="Протокол">
+                                                <i class="bi bi-file-earmark-text"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <p>Нет абитуриентов</p>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+/* Общие стили */
+.applicants-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    margin-bottom: 2.5rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: var(--dark-text);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+}
+
+/* Карточки */
+.add-applicant-card,
+.applicants-list-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.card-header h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Форма добавления */
+.form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--dark-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+    outline: none;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-add {
+    background: var(--primary);
+    color: white;
+    align-self: flex-end;
+    height: 50px;
+    min-width: 150px;
+}
+
+.btn-add:hover {
+    background: var(--primary-dark);
+    color: white !important;
+    transform: translateY(-2px);
+}
+
+.btn-edit {
+    background: var(--light-bg);
+    color: var(--dark-text);
+    border: 1px solid var(--border);
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.btn-edit:hover {
+    background: #f0f0f0;
+}
+
+.btn-delete {
+    background: var(--light-bg);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.btn-delete:hover {
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.btn-scores {
+    background: var(--light-bg);
+    color: var(--info);
+    border: 1px solid var(--info);
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.btn-scores:hover {
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.btn-protocol {
+    background: var(--light-bg);
+    color: var(--warning);
+    border: 1px solid var(--warning);
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.btn-protocol:hover {
+    background: rgba(255, 152, 0, 0.1);
+}
+
+/* Группировка по программам */
+.program-group {
+    margin-bottom: 2rem;
+}
+
+.program-group:last-child {
+    margin-bottom: 0;
+}
+
+.program-title {
+    font-size: 1.25rem;
+    color: var(--dark-text);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-light);
+}
+
+.program-oop {
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: normal;
+    margin-left: 0.5rem;
+}
+
+/* Таблица абитуриентов */
+.applicants-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.applicants-table th {
+    text-align: left;
+    padding: 1rem;
+    background: var(--light-bg);
+    color: var(--dark-text);
+    font-weight: 600;
+}
+
+.applicants-table td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.applicant-name {
+    font-weight: 500;
+}
+
+.exam-date {
+    min-width: 150px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.exam-badge {
+    background: var(--primary);
+    color: white;
+}
+
+.no-exam-badge {
+    background: var(--secondary);
+    color: white;
+}
+
+.warning-row {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.actions {
+    text-align: right;
+    min-width: 220px;
+}
+
+.actions-group {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* Пустое состояние */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--dark-text);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--border);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Адаптивность */
+@media (max-width: 992px) {
+    .applicants-container {
+        padding: 1.5rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .btn-add {
+        width: 100%;
+        align-self: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .applicants-container {
+        padding: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .card-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .applicants-table td {
+        padding: 1rem 0.75rem;
+    }
+
+    .actions {
+        min-width: auto;
+    }
+
+    .actions-group {
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .program-title {
+        font-size: 1.1rem;
+    }
+
+    .applicants-table th,
+    .applicants-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+    /* Добавьте в секцию стилей */
+
+.score-badge {
+    background: var(--success);
+    color: white;
+}
+
+.no-scores-badge {
+    background: var(--secondary);
+    color: white;
+}
+
+.scores {
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Обновите медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+    .scores {
+        min-width: auto;
+    }
+}
+</style>
 {% endblock %}
