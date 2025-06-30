@@ -451,7 +451,7 @@
                 {% elif current_user.role == 'secretary' %}
                     ответственный секретарь отборочной комиссии
                     {% if current_user.engineering_school %} {{ current_user.engineering_school.name }} {% endif %}
-                {% elif current_user.role == 'teacher' %}
+                {% elif current_user.role == 'commission' %}
                     преподаватель
                     {% if current_user.engineering_school %} {{ current_user.engineering_school.name }} {% endif %}
                 {% else %}
@@ -523,32 +523,6 @@
                     <a href="{{ url_for('routes.upload_schedule') }}" class="menu-item {% if request.endpoint == 'routes.upload_schedule' %}active{% endif %}">
                         <i class="bi bi-upload"></i>
                         <span>Загрузка данных</span>
-                    </a>
-                </div>
-                {% endif %}
-
-                <!-- Для преподавателей -->
-                {% if current_user.role == 'teacher' %}
-                <div class="menu-section">
-                    <div class="menu-section-title">Преподавание</div>
-                    <a href="{{ url_for('routes.manage_questions') }}" class="menu-item {% if request.endpoint == 'routes.manage_questions' %}active{% endif %}">
-                        <i class="bi bi-question-circle"></i>
-                        <span>Вопросы</span>
-                    </a>
-                    <a href="{{ url_for('routes.view_results') }}" class="menu-item {% if request.endpoint == 'routes.view_results' %}active{% endif %}">
-                        <i class="bi bi-clipboard-data"></i>
-                        <span>Результаты</span>
-                    </a>
-                </div>
-                {% endif %}
-
-                <!-- Для студентов -->
-                {% if current_user.role == 'student' %}
-                <div class="menu-section">
-                    <div class="menu-section-title">Тестирование</div>
-                    <a href="{{ url_for('routes.test_history') }}" class="menu-item {% if request.endpoint == 'routes.test_history' %}active{% endif %}">
-                        <i class="bi bi-clock-history"></i>
-                        <span>История тестов</span>
                     </a>
                 </div>
                 {% endif %}
