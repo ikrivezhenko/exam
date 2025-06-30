@@ -71,8 +71,7 @@ class Program(db.Model):
     standard_commission = db.relationship('StandardCommission', backref='program', lazy=True, cascade='all, delete-orphan')
     applicants = db.relationship('Applicant', backref='program', lazy=True)
     exam_dates = db.relationship('ExamDate', backref='program', lazy=True)
-    oop = db.relationship("Oop", backref='program', lazy=True)
-
+    oop = db.relationship("Oop", backref='program', lazy=True, cascade='all, delete-orphan')  # Важно: cascade
 
 class Oop(db.Model):
     id = db.Column(db.Integer, primary_key=True)

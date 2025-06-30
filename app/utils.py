@@ -277,7 +277,7 @@ def generate_vedomost(exam_date):
     replacements = {
         '{date}': translate_date_to_ru(exam_date.date.strftime('«%d» %B %Yг.')),
         '{program_code}': exam_date.program.code,
-        '{program_name}': exam_date.program.name + "/" + exam_date.program.oop[0].name,
+        '{program_name}': f"{exam_date.program.name} / {exam_date.program.oop[0].name}" if exam_date.program.oop else exam_date.program.name,
         '{chairman}': format_fio(chairman.user.full_name) if chairman else ""
     }
 

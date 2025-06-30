@@ -261,7 +261,7 @@ def edit_program(program_id):
     
     # Заполняем значение ООП
     if program.oop:
-        form.oop.data = program.oop[0].name  # Берем первое ООП
+        form.oop.data = program.oop[0].name
 
     if form.validate_on_submit():
         # Обновляем основные поля
@@ -269,8 +269,10 @@ def edit_program(program_id):
         program.name = form.name.data
         program.school_id = form.school_id.data
         
+        # Получаем ООП из данных формы
+        oop_name = request.form.get('oop', '')
+        
         # Обновляем ООП
-        oop_name = form.oop.data
         if program.oop:
             # Обновляем существующее ООП
             oop = program.oop[0]
