@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Система оценки вступительных испытаний</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,20 +12,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         :root {
-            --primary: #2e7d32;       /* основной зеленый */
+            --primary: #2e7d32;
             --primary-dark: #1b5e20;
             --primary-light: #4caf50;
-            --accent: #ff9800;        /* акцентный оранжевый */
-            --light-bg: #f8f9fa;      /* светлый фон */
-            --card-bg: #ffffff;       /* фон карточек */
-            --dark-text: #212529;     /* темный текст */
-            --light-text: #f8f9fa;    /* светлый текст */
-            --border: #e0e0e0;        /* цвет границ */
-            --success: #4caf50;       /* успех */
-            --info: #2196f3;          /* информация */
-            --warning: #ff9800;       /* предупреждение */
-            --danger: #f44336;        /* ошибка */
-            --sidebar-width: 280px;   /* ширина бокового меню */
+            --accent: #ff9800;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --dark-text: #212529;
+            --light-text: #f8f9fa;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --info: #2196f3;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -33,188 +37,95 @@
             background-color: var(--light-bg);
             color: var(--dark-text);
             line-height: 1.7;
-            padding-top: 0;
-            margin-left: var(--sidebar-width);
-        }
-
-        /* Стили для кнопки свернуть/развернуть */
-        .toggle-sidebar-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            cursor: pointer;
-            padding: 0 15px;
-            transition: transform 0.2s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .toggle-sidebar-btn:hover {
-            color: rgba(255, 255, 255, 0.9);
-            transform: scale(1.1);
-        }
-
-        /* Для мобильных - скрыть кнопку назад и оставить только toggle */
-        @media (max-width: 768px) {
-            .back-btn {
-                display: none;
-            }
-            .toggle-sidebar-btn {
-                padding: 0 10px;
-            }
-        }
-        body {
             margin: 0;
             padding: 0;
-            display: grid;
-            grid-template-areas:
-                "sidebar header"
-                "sidebar main"
-                "sidebar footer";
-            grid-template-columns: auto 1fr;
-            grid-template-rows: auto 1fr auto;
+            display: flex;
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Сайдбар */
+
+        /* Стили для кнопки выхода */
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white; /* Белый текст */
+            background-color: transparent; /* Прозрачный фон */
+            border: 1px solid white; /* Белая рамка */
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Легкое затемнение при наведении */
+        }
+
+        .logout-btn i {
+            font-size: 1rem;
+        }
+
+        /* Стили для кнопки входа (если нужно) */
+        .login-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            background-color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Позиционирование в шапке */
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            height: 60px; /* Фиксированная высота шапки */
         }
 
         .sidebar {
-            grid-area: sidebar;
-            width: 280px;
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            transition: width 0.3s ease;
-        }
-
-        .main-header {
-            grid-area: header;
-            width: 100%;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .main-content {
-            grid-area: main;
-            padding: 20px;
-        }
-        /* Базовые стили сайдбара */
-        .sidebar {
-            width: 280px;
-            transition: width 0.3s ease;
-            overflow: hidden;
-        }
-
-        /* Свернутое состояние */
-        .sidebar.collapsed {
-            width: 70px; /* Ширина только под иконки */
-        }
-
-        .sidebar.collapsed .sidebar-title span,
-        .sidebar.collapsed .menu-item span,
-        .sidebar.collapsed .menu-section-title {
-            display: none; /* Скрываем текст */
-        }
-
-        .sidebar.collapsed .menu-item {
-            justify-content: center;
-            padding: 0.8rem 0;
-        }
-
-        .sidebar.collapsed .menu-item i {
-            margin-right: 0;
-            font-size: 1.4rem;
-        }
-
-        .sidebar.collapsed .sidebar-header {
-            padding: 1.5rem 0;
-            text-align: center;
-        }
-
-        /* Анимация иконок при наведении */
-        .sidebar.collapsed .menu-item:hover::after {
-            content: attr(data-title);
-            position: absolute;
-            left: 100%;
-            top: 0;
-            background: var(--primary-dark);
-            padding: 0.8rem 1.5rem;
-            border-radius: 0 8px 8px 0;
-            white-space: nowrap;
-            margin-left: 10px;
-            z-index: 1000;
-        }
-        .main-footer {
-            grid-area: footer;
-            width: 100%;
-        }
-
-        /* Свернутое состояние */
-        .sidebar.collapsed {
-            width: 70px;
-        }
-
-        body:not(.sidebar-collapsed) {
-            grid-template-columns: 280px 1fr;
-        }
-
-        body.sidebar-collapsed {
-            grid-template-columns: 70px 1fr;
-        }
-
-        /* Убираем все лишние margin-left */
-        .main-header,
-        .main-content,
-        .main-footer {
-            margin-left: 0 !important;
-        }
-
-        /* Адаптация для мобильных */
-        @media (max-width: 768px) {
-            body {
-                grid-template-areas:
-                    "header"
-                    "main"
-                    "footer";
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                position: fixed;
-                left: -280px;
-                z-index: 1100;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-        }
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
             width: var(--sidebar-width);
-            height: 100vh;
             background-color: var(--primary-dark);
             color: white;
             z-index: 1000;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
-            transition: all 0.3s ease;
-        }
-        .sidebar * {
-            color: inherit; /* Наследует цвет от .sidebar */
+            transition: transform 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            flex-shrink: 0;
+            font-size: 0.9rem;
         }
 
         .sidebar-header {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            justify-content: center; /* Центрируем по горизонтали */
-            align-items: center; /* Центрируем по вертикали */
-            text-align: center; /* Центрируем текст */
-            height: 80px; /* Фиксированная высота */
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 80px;
         }
 
         .sidebar-title {
@@ -224,6 +135,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.1rem;
         }
 
         .sidebar-menu {
@@ -246,13 +158,12 @@
         .menu-item {
             display: flex;
             align-items: center;
-            padding: 0.8rem 1.5rem;
+            padding: 0.5rem 1.5rem;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
         }
-        
 
         .menu-item:hover, .menu-item.active {
             background-color: rgba(255, 255, 255, 0.1);
@@ -267,14 +178,18 @@
             text-align: center;
         }
 
-        .menu-item .badge {
-            margin-left: auto;
-            background-color: var(--accent);
-            color: var(--dark-text);
-            font-size: 0.7rem;
+        /* Основной контент */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            width: calc(100% - var(--sidebar-width));
         }
 
-        /* Header */
+        /* Шапка */
         .main-header {
             background-color: var(--primary);
             color: white;
@@ -282,16 +197,14 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
-            z-index: 1000;
-            width: 100%; /* Занимает всю ширину */
-            margin-left: 0; /* Убираем margin-left */
+            z-index: 100;
+            width: 100%;
         }
 
         .header-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
@@ -301,8 +214,8 @@
         .header-left {
             display: flex;
             align-items: center;
-            flex-grow: 1; /* Растягивается на всё доступное пространство */
-            min-width: 0; /* Позволяет сжиматься */
+            flex-grow: 1;
+            min-width: 0;
         }
 
         .logo {
@@ -313,160 +226,84 @@
             color: white;
             text-decoration: none;
             letter-spacing: -0.5px;
-            margin-right: 2rem; /* Добавлен отступ справа */
-        }
-
-        .logo i {
-            margin-right: 12px;
-            font-size: 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px;
-            border-radius: 12px;
-        }
-
-        .back-btn {
-            color: white;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            transition: transform 0.2s ease;
-            margin-right: 15px;
-            
-        }
-
-        .back-btn:hover {
-            transform: translateX(-3px);
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .user-nav {
-            display: flex;
-            align-items: center;
-            flex-shrink: 0; /* Запрещаем сжимание */
-            gap: 15px;
-        }
-
-        .user-info {
-            text-align: right;
+            margin-right: 2rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
+        .logo img {
+            height: 40px;
+            filter: brightness(0) invert(1);
+            margin-right: 10px;
+        }
+
+        .toggle-sidebar-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0 10px;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .toggle-sidebar-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+            transform: scale(1.1);
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: left;
+            margin-left: 15px; /* Добавлен отступ от края */
+            max-width: 200px;
+            padding-left: 10px; /* Дополнительный внутренний отступ */
+        }
+
         .user-name {
             font-weight: 500;
             font-size: 1.1rem;
+            line-height: 1.4;
+            margin-bottom: 0.3rem;
         }
 
-        .user-role {
+        .user-role-text {
             font-size: 0.9rem;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 3px 10px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 4px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2px;
+            text-align: left;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.2;
+            margin-bottom: 1rem;
         }
 
-        /* Кнопки с обводкой */
-        .outline-btn {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-            padding: 8px 22px;
-            border-radius: 30px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .outline-btn:hover {
-            background: white;
-            color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .outline-btn i {
-            font-size: 1.2rem;
-        }
-
-        /* Main Content */
-         .main-content {
+        /* Контент */
+        .main-content {
+            flex: 1;
+            padding: 20px;
             max-width: 1400px;
-            margin: 1rem auto; /* Уменьшаем верхний отступ */
-            padding: 0 2rem;
-            min-height: calc(100vh - 200px);
-        }
-
-        .content-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            padding: 2.5rem;
-            margin-bottom: 3rem;
-            border: none;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .content-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
+            margin: 0 auto;
         }
 
-        .content-card-header {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Flash Messages */
-        .flash-messages {
-            margin-bottom: 2rem;
-        }
-
-        .flash {
-            padding: 1.25rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: none;
-        }
-
-        .flash-success {
-            background-color: #e8f5e9;
-            color: var(--success);
-        }
-
-        .flash-error {
-            background-color: #ffebee;
-            color: var(--danger);
-        }
-
-        .flash i {
-            font-size: 1.8rem;
-        }
-
-        /* Footer */
+        /* Футер */
         .main-footer {
             background-color: var(--primary-dark);
             color: rgba(255, 255, 255, 0.85);
             padding: 2rem 0;
             text-align: center;
-            width: 100%; /* Занимает всю ширину */
-            margin-left: 0; /* Убираем margin-left */
+            width: 100%;
         }
 
         .footer-content {
@@ -483,12 +320,15 @@
             display: flex;
             gap: 1.5rem;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .footer-link {
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
             transition: color 0.2s ease;
+            white-space: nowrap;
         }
 
         .footer-link:hover {
@@ -500,275 +340,101 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Typography */
-        h1, h2, h3, h4, h5 {
-            color: var(--primary-dark);
-            font-weight: 700;
-            margin-bottom: 1.8rem;
-            letter-spacing: -0.5px;
-        }
-
-        h1 {
-            font-size: 2.6rem;
-            position: relative;
-            padding-bottom: 1.2rem;
-        }
-
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: var(--accent);
-            border-radius: 2px;
-        }
-
-        h2 {
-            font-size: 2rem;
-            padding-bottom: 1rem;
-        }
-
-        h3 {
-            font-size: 1.6rem;
-        }
-
-        p {
-            margin-bottom: 1.5rem;
-            color: #444;
-            line-height: 1.8;
-        }
-
-        /* Таблицы */
-        .elegant-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            margin: 2rem 0;
-        }
-
-        .elegant-table thead {
-            background: linear-gradient(to right, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .elegant-table th {
-            padding: 1.2rem 1.5rem;
-            text-align: left;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .elegant-table tbody tr {
-            transition: all 0.2s ease;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .elegant-table tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        .elegant-table tbody tr:nth-child(even) {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        .elegant-table tbody tr:hover {
-            background-color: rgba(46, 125, 50, 0.05);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        .elegant-table td {
-            padding: 1.2rem 1.5rem;
-            color: #444;
-        }
-
-        /* Кнопки */
-        .btn-elegant {
-            border-radius: 30px;
-            padding: 10px 24px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: 2px solid;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary-elegant {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary-elegant:hover {
-            background: var(--primary-dark);
-            border-color: var(--primary-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
-        }
-
-        .btn-outline-elegant {
-            background: transparent;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline-elegant:hover {
+        /* Мобильное меню */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
             background: var(--primary);
             color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
 
-        .btn-danger-elegant {
-            background: var(--danger);
-            border-color: var(--danger);
-            color: white;
-        }
-
-        .btn-danger-elegant:hover {
-            background: #d32f2f;
-            border-color: #d32f2f;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.3);
-        }
-
-        /* Формы */
-        .form-control-elegant {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 0.8rem 1.2rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control-elegant:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
-        }
-
-        /* Utilities */
-        .spacer-lg {
-            margin-bottom: 3rem;
-        }
-
-        .spacer-md {
-            margin-bottom: 2rem;
-        }
-
-        .spacer-sm {
-            margin-bottom: 1.5rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
+        /* Адаптация */
+        @media (max-width: 1200px) {
             :root {
                 --sidebar-width: 250px;
             }
+        }
 
+        @media (max-width: 992px) {
             .header-container {
-                padding: 0 1.5rem;
+                padding: 0 15px;
             }
 
             .main-content {
-                padding: 0 1.5rem;
-            }
-
-            .content-card {
-                padding: 2rem;
+                padding: 15px;
             }
         }
 
         @media (max-width: 768px) {
-            :root {
-                --sidebar-width: 0;
-            }
-
-            body {
-                font-family: 'Segoe UI', 'Roboto', sans-serif;
-                background-color: var(--light-bg);
-                color: var(--dark-text);
-                line-height: 1.7;
-                padding-top: 0;
-                margin: 0; /* Убираем margin-left, так как сайдбар fixed */
-            }
-
             .sidebar {
                 transform: translateX(-100%);
+                z-index: 1050;
             }
 
             .sidebar.active {
                 transform: translateX(0);
             }
 
-            .main-header, .main-footer {
+            .main-wrapper {
                 margin-left: 0;
                 width: 100%;
+            }
+
+            .mobile-menu-btn {
+                display: block;
             }
 
             .logo span {
-                flex-shrink: 0;
-                margin-right: 30px;
+                display: none;
             }
 
             .header-container {
-                flex-direction: column;
-                gap: 1.2rem;
-                text-align: center;
-                padding: 1rem;
+                flex-direction: row;
+                gap: 10px;
+                padding: 0 10px;
             }
 
             .header-left {
-                width: 100%;
-                justify-content: center;
+                justify-content: flex-start;
             }
 
+            .toggle-sidebar-btn {
+                padding: 0 8px;
+            }
+        }
+
+        @media (max-width: 576px) {
             .user-info {
-                text-align: center;
-                margin-left: 0;
-            }
-
-            .main-content {
-                width: 100%;
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 20px;
-                box-sizing: border-box;
-            }
-
-            .content-card {
-                width: 100%;
-                box-sizing: border-box;
-            }
-
-            h1 {
-                font-size: 2.2rem;
-            }
-
-            h2 {
-                font-size: 1.8rem;
+                display: none;
             }
 
             .footer-links {
                 flex-direction: column;
                 gap: 0.8rem;
             }
-        }
 
-        @media (min-width: 769px) {
-            .mobile-menu-btn {
-                display: none;
+            .main-content {
+                padding: 10px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Кнопка мобильного меню -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="bi bi-list"></i>
+    </button>
+
     <!-- Боковое меню -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3 class="sidebar-title">
                 <i class="bi bi-journal-check"></i>
@@ -776,7 +442,23 @@
             </h3>
         </div>
         <nav class="sidebar-menu">
-            {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated %}
+            <div class="user-info">
+            <div class="user-name">{{ current_user.full_name }}</div>
+            <div class="user-role-text">
+                {% if current_user.role == 'admin' %}
+                    администратор системы
+                {% elif current_user.role == 'secretary' %}
+                    ответственный секретарь отборочной комиссии
+                    {% if current_user.engineering_school %} {{ current_user.engineering_school.name }} {% endif %}
+                {% elif current_user.role == 'teacher' %}
+                    преподаватель
+                    {% if current_user.engineering_school %} {{ current_user.engineering_school.name }} {% endif %}
+                {% else %}
+                    {{ current_user.role }}
+                {% endif %}
+            </div>
+        </div>
                 <!-- Основное меню -->
                 <div class="menu-section">
                     <div class="menu-section-title">Основное</div>
@@ -892,57 +574,46 @@
         </nav>
     </aside>
 
-    <!-- Кнопка мобильного меню -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-        <i class="bi bi-list"></i>
-    </button>
-
     <!-- Основной контент -->
-    <header class="main-header">
-        <div class="header-container">
-            <div class="header-left">
-                {% if current_user.is_authenticated %}
-                    <button class="toggle-sidebar-btn">
-                        <i class="bi bi-list"></i>
-                    </button>
-                {% endif %}
-                <a href="{{ url_for('routes.home') }}" class="logo">
-                    <img src="https://apply.tpu.ru/images/2022/footer-logo-ru.svg"
-                        style="height: 40px; filter: brightness(0) invert(1);">
-                    <span></span>
-                </a>
-            </div>
-
-            <nav class="user-nav">
-                {% if current_user.is_authenticated %}
-                <div class="user-info">
-                    <div class="user-name">{{ current_user.full_name }}</div>
-                    <div class="user-role">{{ current_user.role }}</div>
+    <div class="main-wrapper">
+        <header class="main-header">
+            <div class="header-container">
+                <div class="header-left">
+                    <a href="{{ url_for('routes.home') }}" class="logo">
+                        <img src="https://apply.tpu.ru/images/2022/footer-logo-ru.svg" alt="Логотип">
+                    </a>
                 </div>
-                {% else %}
-                <a href="{{ url_for('routes.login') }}" class="outline-btn">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Войти</span>
-                </a>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
 
-    <main class="main-content">
-        <!-- Flash сообщения -->
-        <div class="flash-messages">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="flash flash-{{ category }}">
-                        <i class="bi bi-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
-                        <span>{{ message }}</span>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
+                <nav class="user-nav">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('routes.logout') }}" class="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Выйти</span>
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('routes.login') }}" class="outline-btn">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Войти</span>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Flash сообщения -->
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            <i class="bi bi-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
 
         <!-- Основной контент страницы -->
         {% block content %}
@@ -956,75 +627,88 @@
         {% endblock %}
     </main>
 
-    <footer class="main-footer">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="#" class="footer-link">О системе</a>
-                <a href="#" class="footer-link">Контакты</a>
-                <a href="#" class="footer-link">Помощь</a>
-                <a href="#" class="footer-link">Документация</a>
+        <footer class="main-footer">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#" class="footer-link">О системе</a>
+                    <a href="#" class="footer-link">Контакты</a>
+                    <a href="#" class="footer-link">Помощь</a>
+                    <a href="#" class="footer-link">Документация</a>
+                </div>
+                <div class="footer-copyright">
+                    &copy; 2025 Система оценки вступительных испытаний. Все права защищены.
+                </div>
             </div>
-            <div class="footer-copyright">
-                &copy; 2025 Система оценки вступительных испытаний. Все права защищены.
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Кастомные скрипты -->
     <script>
-        // Мобильное меню
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const sidebar = document.querySelector('.sidebar');
+            const toggleSidebarBtn = document.getElementById('toggleSidebar');
+            const sidebar = document.getElementById('sidebar');
+            const mainWrapper = document.querySelector('.main-wrapper');
 
-            if (mobileMenuBtn && sidebar) {
-                mobileMenuBtn.addEventListener('click', function() {
-                    sidebar.classList.toggle('active');
-                });
+            // Функция переключения сайдбара
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                document.body.classList.toggle('sidebar-active');
 
-                // Закрытие меню при клике вне его
-                document.addEventListener('click', function(e) {
-                    if (!sidebar.contains(e.target) && e.target !== mobileMenuBtn) {
-                        sidebar.classList.remove('active');
-                    }
-                });
+                // Сохраняем состояние в localStorage
+                const isActive = sidebar.classList.contains('active');
+                localStorage.setItem('sidebarActive', isActive);
             }
 
-            // Плавное появление контента
-            document.querySelectorAll('.content-card, .flash').forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            // Обработчики событий
+            if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+            if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', toggleSidebar);
 
-                setTimeout(() => {
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, 100);
+            // Закрытие меню при клике вне его
+            document.addEventListener('click', function(e) {
+                if (!sidebar.contains(e.target) &&
+                    !mobileMenuBtn.contains(e.target) &&
+                    !toggleSidebarBtn.contains(e.target) &&
+                    sidebar.classList.contains('active') &&
+                    window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
             });
+
+            // Восстановление состояния сайдбара
+            if (localStorage.getItem('sidebarActive') === 'true') {
+                sidebar.classList.add('active');
+                document.body.classList.add('sidebar-active');
+            }
+
+            // Адаптация высоты карточек
+            function updateCardHeights() {
+                if (window.innerWidth > 768) {
+                    const cards = document.querySelectorAll('.dashboard-card');
+                    let maxHeight = 0;
+
+                    // Сброс высоты
+                    cards.forEach(card => card.style.height = 'auto');
+
+                    // Найти максимальную высоту
+                    cards.forEach(card => {
+                        if (card.offsetHeight > maxHeight) {
+                            maxHeight = card.offsetHeight;
+                        }
+                    });
+
+                    // Установить высоту
+                    cards.forEach(card => card.style.height = `${maxHeight}px`);
+                }
+            }
+
+            // Вызов при загрузке и изменении размера окна
+            window.addEventListener('load', updateCardHeights);
+            window.addEventListener('resize', updateCardHeights);
         });
 
-            document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
-                const sidebar = document.querySelector('.sidebar');
-                sidebar.classList.toggle('collapsed');
-                document.body.classList.toggle('sidebar-collapsed');
-
-                // Сохраняем состояние
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            });
-
-            // Восстанавливаем состояние при загрузке
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                document.querySelector('.sidebar').classList.add('collapsed');
-                document.body.classList.add('sidebar-collapsed');
-            }
-
-            // Для мобильного меню
-            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-                document.querySelector('.sidebar').classList.toggle('active');
-            });
     </script>
 
     {% block scripts %}{% endblock %}
