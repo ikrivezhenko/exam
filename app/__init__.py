@@ -1,3 +1,4 @@
+
 import os
 from flask import Flask, render_template
 from flask_login import LoginManager
@@ -46,9 +47,21 @@ def create_app():
     # Регистрация blueprint
     from .routes import routes as main_blueprint
     app.register_blueprint(main_blueprint)
+    
+    # Обработчики ошибок
     @app.errorhandler(404)
-    def forbidden(e):
-        return render_template('404.html')
+    def page_not_found(e):
+        return render_template('404.html'), 404
+    
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        return render_template('500.html'), 500
+    
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        # Логируем ошибку
+        app.logger.error(f"Unhandled Exception: {str(e)}")
+        return render_template('500.html'), 500
 
     # Создание таблиц
     with app.app_context():

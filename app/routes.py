@@ -741,6 +741,23 @@ def standard_commission():
     commissions = StandardCommission.query.all()
     return render_template('standard_commission.html', form=form, commissions=commissions)
 
+@routes.route('/test500')
+def test_500_error():
+    # Генерируем ошибку для тестирования
+    raise Exception("Тестовая ошибка сервера")
+
+@routes.errorhandler(502)
+def bad_gateway(e):
+    return render_template('500.html', error_message="Ошибка 502: Неверный ответ от сервера"), 502
+
+@routes.errorhandler(503)
+def service_unavailable(e):
+    return render_template('500.html', error_message="Ошибка 503: Сервис временно недоступен"), 503
+
+@routes.errorhandler(504)
+def gateway_timeout(e):
+    return render_template('500.html', error_message="Ошибка 504: Превышено время ожидания ответа"), 504
+
 @routes.route('/delete_standard_commission/<int:commission_id>', methods=['POST'])
 @login_required
 def delete_standard_commission(commission_id):
