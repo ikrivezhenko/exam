@@ -1066,19 +1066,15 @@ def upload_schedule():
                         # 2. Собираем ФИО в одну строку
                         full_name = f"{row['Ф']} {row['И']} {row['О']}".strip()
                         
-                        # 3. Обработка программы
-                        program_code = str(row['ООП']).split()[0] if pd.notna(row['ООП']) else ''
-                        program_name = ' '.join(str(row['ООП']).split()[1:]) if pd.notna(row['ООП']) else ''
-                        
-                        if not program_code:
-                            # Если код не указан, используем направление
-                            program_code = str(row['Дисциплина']).split()[0] if pd.notna(row['Дисциплина']) else ''
-                            program_name = ' '.join(str(row['Дисциплина']).split()[1:]) if pd.notna(row['Дисциплина']) else ''
+                        program_code = str(row['Дисциплина']).split()[0] if pd.notna(row['Дисциплина']) else ''
+            
+                        # Название - остальная часть строки
+                        program_name = ' '.join(str(row['Дисциплина']).split()[1:]) if pd.notna(row['Дисциплина']) else ''
                         
                         if not program_code:
                             raise ValueError("Не указан код программы")
-                        
-                        # Поиск или создание программы
+
+                        # Создаем или находим программу
                         program = Program.query.filter_by(code=program_code).first()
                         if not program:
                             program = Program(
@@ -1087,8 +1083,22 @@ def upload_schedule():
                                 school_id=current_user.school_id if current_user.role == 'secretary' else None
                             )
                             db.session.add(program)
-                            db.session.commit()
-                        
+                            # Для новых программ сразу создаем ООП
+                            oop = Oop(
+                                name=str(row['ООП']).strip() if pd.notna(row.get('ООП', '')) else 'Не указано',
+                                program_id=program.id
+                            )
+                            db.session.add(oop)
+                        else:
+                            # Для существующих программ обновляем ООП
+                            if program.oop:
+                                program.oop[0].name = str(row['ООП']).strip()
+                            else:
+                                oop = Oop(
+                                    name=str(row['ООП']).strip() if pd.notna(row.get('ООП', '')) else 'Не указано',
+                                    program_id=program.id
+                                )
+                                db.session.add(oop)
                         # 4. Обработка даты экзамена
                         exam_datetime = None
                         if pd.notna(row['Дата/Время экз']):

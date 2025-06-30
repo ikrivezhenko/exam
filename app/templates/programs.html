@@ -93,9 +93,11 @@
                             </td>
                             <td>
                                 {% if program.oop %}
-                                <span class="badge bg-light text-dark">{{ program.oop[0].name }}</span>
+                                    {% for o in program.oop %}
+                                        <span class="badge bg-light text-dark">{{ o.name }}</span>
+                                    {% endfor %}
                                 {% else %}
-                                <span class="text-muted">Не указана</span>
+                                    <span class="text-muted">Не указана</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">{{ program.questions|length }}</td>
