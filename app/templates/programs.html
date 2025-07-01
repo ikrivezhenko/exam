@@ -1,11 +1,257 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    /* Основные стили страницы */
+    .container.py-4 {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Стили заголовка */
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: #7f8c8d;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #3498db;
+    }
+
+    /* Стили карточек */
+    .custom-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border: none;
+    }
+
+    .custom-card-header {
+        padding: 1.25rem 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-card-header h3 {
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Стили формы */
+    .form-label {
+        font-weight: 500;
+        color: #34495e;
+        margin-bottom: 0.5rem;
+    }
+
+    .custom-form-control {
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s;
+        background-color: #f8f9fa;
+    }
+
+    .custom-form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        background-color: #fff;
+    }
+
+    /* Стили кнопок */
+    .btn-custom-primary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-custom-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Стили таблицы */
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .custom-table thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #34495e;
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        position: sticky;
+        top: 0;
+        border-bottom: 1px solid #dfe6e9;
+    }
+
+    .custom-table tbody tr {
+        transition: all 0.2s;
+    }
+
+    .custom-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #f1f8fe;
+    }
+
+    .custom-table td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #eee;
+        color: #34495e;
+    }
+
+    /* Стили бейджей */
+    .badge-custom {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        font-weight: 500;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge.bg-light {
+        background-color: #f1f3f5 !important;
+        color: #2c3e50;
+        font-weight: 500;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+    }
+
+    /* Стили кнопок действий */
+    .btn-group .btn {
+        border-radius: 8px !important;
+        margin: 0 0.25rem;
+        transition: all 0.2s;
+    }
+
+    .btn-outline-primary {
+        color: #3498db;
+        border-color: #3498db;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .btn-outline-danger {
+        color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    /* Стили для пустой таблицы */
+    .alert-light {
+        background-color: #f8f9fa;
+        border: 1px solid #dfe6e9;
+        color: #7f8c8d;
+        border-radius: 8px;
+    }
+
+    /* Адаптивные стили */
+    @media (max-width: 992px) {
+        .card-body {
+            padding: 1rem;
+        }
+
+        .custom-table thead {
+            display: none;
+        }
+
+        .custom-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem;
+        }
+
+        .custom-table tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .custom-table tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-right: 1rem;
+        }
+
+        .custom-table tbody td:last-child {
+            justify-content: flex-end;
+            border-bottom: none;
+        }
+
+        .btn-group {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .breadcrumb {
+            margin-top: 0.5rem;
+        }
+
+        .form-row .col-md-3,
+        .form-row .col-md-5 {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
 <div class="container py-4">
     <!-- Заголовок -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-header d-flex justify-content-between align-items-center">
         <h2 class="mb-0">
-            <i class="bi bi-bookmarks-fill me-2"></i>Направления подготовки
+            <i class="bi bi-bookmarks-fill me-2 text-primary"></i>Направления подготовки
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -17,9 +263,9 @@
 
     <!-- Карточка добавления -->
     <div class="custom-card">
-        <div class="custom-card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">
-                <i class="bi bi-plus-circle me-2"></i>Добавить направление
+        <div class="custom-card-header">
+            <h3>
+                <i class="bi bi-plus-circle me-2 text-primary"></i>Добавить направление
             </h3>
         </div>
         <div class="card-body">
@@ -28,17 +274,17 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Код направления</label>
-                    {{ form.code(class="custom-form-control form-control", placeholder="Например: 09.03.01") }}
+                    {{ form.code(class="custom-form-control form-control", placeholder="09.03.01") }}
                 </div>
 
                 <div class="col-md-5">
                     <label class="form-label">Название</label>
-                    {{ form.name(class="custom-form-control form-control", placeholder="Полное название направления") }}
+                    {{ form.name(class="custom-form-control form-control", placeholder="Информатика и вычислительная техника") }}
                 </div>
 
                 <div class="col-md-5">
                     <label class="form-label">ООП</label>
-                    {{ form.oop(class="custom-form-control form-control", placeholder="Полное название ООП") }}
+                    {{ form.oop(class="custom-form-control form-control", placeholder="Программная инженерия") }}
                 </div>
 
                 <div class="col-md-3">
@@ -47,7 +293,7 @@
                 </div>
 
                 <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-custom-primary w-100">
+                    <button type="submit" class="btn btn-custom-primary w-150">
                         <i class="bi bi-save me-1"></i>Добавить
                     </button>
                 </div>
@@ -55,15 +301,14 @@
         </div>
     </div>
 
-        <!-- Карточка списка -->
+    <!-- Карточка списка -->
     <div class="custom-card">
         <div class="custom-card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">
-                <i class="bi bi-list-ul me-2"></i>Список направлений
+            <h3>
+                <i class="bi bi-list-ul me-2 text-primary"></i>Список направлений
             </h3>
             <span class="badge badge-custom">{{ programs|length }} направлений</span>
         </div>
-
 
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -82,35 +327,32 @@
                     <tbody>
                         {% for program in programs %}
                         <tr>
-                            <td class="ps-4 fw-bold">{{ program.code }}</td>
-                            <td>{{ program.name }}</td>
-                            <td>
+                            <td class="ps-4 fw-bold" data-label="Код">{{ program.code }}</td>
+                            <td data-label="Название">{{ program.name }}</td>
+                            <td data-label="Инженерная школа">
                                 {% if program.school %}
-                                <span class="badge bg-light text-dark">{{ program.school.name }}</span>
+                                <span class="badge bg-light">{{ program.school.name }}</span>
                                 {% else %}
                                 <span class="text-muted">Не указана</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td data-label="ООП">
                                 {% if program.oop %}
                                     {% for o in program.oop %}
-                                        <span class="badge bg-light text-dark">{{ o.name }}</span>
+                                        <span class="badge bg-light">{{ o.name }}</span>
                                     {% endfor %}
                                 {% else %}
                                     <span class="text-muted">Не указана</span>
                                 {% endif %}
                             </td>
-                            <td class="text-center">{{ program.questions|length }}</td>
-                            <td class="text-center">{{ program.applicants|length }}</td>
+                            <td class="text-center" data-label="Вопросы">{{ program.questions|length }}</td>
+                            <td class="text-center" data-label="Абитуриенты">{{ program.applicants|length }}</td>
                             <td class="text-end pe-4">
                                 <div class="btn-group">
-                                    <!-- Кнопка редактирования -->
                                     <a href="{{ url_for('routes.edit_program', program_id=program.id) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-
-                                    <!-- Кнопка удаления -->
                                     <form action="{{ url_for('routes.delete_program', program_id=program.id) }}" method="POST">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Удалить направление? Все связанные данные будут потеряны!')">
@@ -122,7 +364,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" class="text-center py-4">
+                            <td colspan="7" class="text-center py-4">
                                 <div class="alert alert-light">
                                     <i class="bi bi-info-circle me-2"></i>Нет направлений для отображения
                                 </div>

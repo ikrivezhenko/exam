@@ -1,11 +1,281 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="admin-container">
-    <h2>Управление датами экзаменов</h2>
+<style>
+    /* Основные стили контейнера */
+    .admin-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
 
+    /* Заголовки */
+    .admin-container h2 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #3498db;
+    }
+
+    .admin-container h3 {
+        color: #34495e;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Карточки */
+    .content-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: none;
+    }
+
+    .spacer-md {
+        margin-bottom: 3rem;
+    }
+
+    /* Формы */
+    .elegant-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #34495e;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control-elegant {
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s;
+        background-color: #f8f9fa;
+        width: 100%;
+    }
+
+    .form-control-elegant:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        background-color: #fff;
+    }
+
+    /* Кнопки */
+    .btn-elegant {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .btn-primary-elegant {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary-elegant:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-outline-elegant {
+        border: 1px solid #3498db;
+        color: #3498db;
+        background: transparent;
+    }
+
+    .btn-outline-elegant:hover {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-outline-elegant.active {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-group .btn-outline-elegant:first-child {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .btn-group .btn-outline-elegant:last-child {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        border: none;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Таблица */
+    .elegant-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.95rem;
+    }
+
+    .elegant-table thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #34495e;
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #dfe6e9;
+        position: sticky;
+        top: 0;
+    }
+
+    .elegant-table tbody tr {
+        transition: all 0.2s;
+    }
+
+    .elegant-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    .elegant-table tbody tr:hover {
+        background-color: #f1f8fe;
+    }
+
+    .elegant-table td {
+        padding: 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #eee;
+        color: #34495e;
+    }
+
+    /* Список комиссии */
+    .commission-list {
+        margin: 0;
+        padding-left: 1.2rem;
+        list-style-type: none;
+    }
+
+    .commission-list li {
+        margin-bottom: 0.5rem;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    .commission-list li:before {
+        content: "•";
+        color: #3498db;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+    }
+
+    /* Кнопки действий */
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+
+    /* Сообщение о пустой таблице */
+    .text-center.py-4 {
+        color: #7f8c8d;
+        font-style: italic;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 992px) {
+        .content-card {
+            padding: 1.5rem;
+        }
+
+        .elegant-table thead {
+            display: none;
+        }
+
+        .elegant-table tbody tr {
+            display: block;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+        }
+
+        .elegant-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .elegant-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-right: 1rem;
+        }
+
+        .elegant-table td:last-child {
+            justify-content: flex-end;
+            border-bottom: none;
+        }
+
+        .action-buttons {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 0 0.5rem;
+        }
+
+        .content-card {
+            padding: 1rem;
+        }
+
+        .btn-group {
+            width: 100%;
+        }
+
+        .btn-group .btn {
+            width: 50%;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="admin-container">
+    <h2><i class="bi bi-calendar-check me-2"></i>Управление датами экзаменов</h2>
+
+    <!-- Карточка создания новой даты -->
     <div class="content-card spacer-md">
-        <h3>Создать новую дату экзамена</h3>
+        <h3><i class="bi bi-plus-circle me-2"></i>Создать новую дату экзамена</h3>
         <form method="POST" class="elegant-form">
             {{ form.hidden_tag() }}
             <div class="row g-3">
@@ -30,15 +300,16 @@
         </form>
     </div>
 
+    <!-- Карточка фильтрации -->
     <div class="content-card">
-        <h3>Фильтрация и сортировка</h3>
+        <h3><i class="bi bi-funnel me-2"></i>Фильтрация и сортировка</h3>
         <form method="GET" class="elegant-form mb-4">
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="program_filter" class="form-label">Фильтр по программе</label>
-                        <input type="text" 
-                            class="form-control form-control-elegant" 
+                        <input type="text"
+                            class="form-control form-control-elegant"
                             id="program_filter"
                             name="program_filter"
                             value="{{ program_filter }}"
@@ -51,29 +322,30 @@
                         <div class="btn-group w-100">
                             <a href="{{ url_for('routes.exam_dates', sort='asc', program_filter=program_filter) }}"
                             class="btn btn-outline-elegant btn-elegant {% if sort_order == 'asc' %}active{% endif %}">
-                                По возрастанию
+                                <i class="bi bi-sort-up me-1"></i>По возрастанию
                             </a>
                             <a href="{{ url_for('routes.exam_dates', sort='desc', program_filter=program_filter) }}"
                             class="btn btn-outline-elegant btn-elegant {% if sort_order == 'desc' %}active{% endif %}">
-                                По убыванию
+                                <i class="bi bi-sort-down me-1"></i>По убыванию
                             </a>
                         </div>
                     </div>
                 </div>
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary-elegant btn-elegant">
-                        Применить фильтр
+                    <button type="submit" class="btn btn-primary-elegant btn-elegant me-2">
+                        <i class="bi bi-check-circle me-1"></i>Применить фильтр
                     </button>
                     <a href="{{ url_for('routes.exam_dates') }}" class="btn btn-outline-elegant btn-elegant">
-                        Сбросить
+                        <i class="bi bi-x-circle me-1"></i>Сбросить
                     </a>
                 </div>
             </div>
         </form>
     </div>
 
+    <!-- Карточка списка дат -->
     <div class="content-card">
-        <h3>Список экзаменационных дат</h3>
+        <h3><i class="bi bi-list-check me-2"></i>Список экзаменационных дат</h3>
         <div class="table-responsive">
             <table class="elegant-table">
                 <thead>
@@ -87,36 +359,41 @@
                 <tbody>
                     {% for exam_date in exam_dates %}
                     <tr>
-                        <td>{{ exam_date.date.strftime('%d.%m.%Y') }}</td>
-                        <td>{{ exam_date.program.code }} {{ exam_date.program.name }}</td>
-                        <td>
+                        <td data-label="Дата"><strong>{{ exam_date.date.strftime('%d.%m.%Y') }}</strong></td>
+                        <td data-label="Программа">
+                            <span class="badge bg-light text-dark">{{ exam_date.program.code }}</span>
+                            {{ exam_date.program.name }}
+                        </td>
+                        <td data-label="Комиссия">
                             <ul class="commission-list">
                                 {% for member in exam_date.commission %}
-                                <li>{{ member.user.full_name }} ({{ member.role }})</li>
+                                <li>{{ member.user.full_name }} <small class="text-muted">({{ member.role }})</small></li>
+                                {% else %}
+                                <li class="text-muted">Комиссия не назначена</li>
                                 {% endfor %}
                             </ul>
                         </td>
-                        <td>
+                        <td data-label="Действия">
                             <div class="action-buttons">
                                 <a href="{{ url_for('routes.assign_commission', exam_date_id=exam_date.id) }}"
                                    class="btn btn-outline-elegant btn-elegant btn-sm">
-                                    <i class="bi bi-people-fill"></i> Комиссия
+                                    <i class="bi bi-people-fill me-1"></i>Комиссия
                                 </a>
                                 <a href="{{ url_for('routes.assign_applicants', exam_date_id=exam_date.id) }}"
                                    class="btn btn-outline-elegant btn-elegant btn-sm">
-                                    <i class="bi bi-person-plus-fill"></i> Абитуриенты
+                                    <i class="bi bi-person-plus-fill me-1"></i>Абитуриенты
                                 </a>
                                 <a href="{{ url_for('routes.view_vedomost', exam_date_id=exam_date.id) }}"
                                    class="btn btn-outline-elegant btn-elegant btn-sm">
-                                    <i class="bi bi-file-text-fill"></i> Ведомость
+                                    <i class="bi bi-file-text-fill me-1"></i>Ведомость
                                 </a>
 
-                                <form action="{{ url_for('routes.delete_exam_date', exam_date_id=exam_date.id) }}" 
-                                    method="POST" 
+                                <form action="{{ url_for('routes.delete_exam_date', exam_date_id=exam_date.id) }}"
+                                    method="POST"
                                     class="d-inline"
                                     onsubmit="return confirm('Вы уверены, что хотите удалить эту экзаменационную дату?');">
                                     <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="bi bi-trash-fill"></i> Удалить
+                                        <i class="bi bi-trash-fill me-1"></i>Удалить
                                     </button>
                                 </form>
                             </div>
@@ -124,7 +401,11 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="text-center py-4">Нет созданных экзаменационных дат</td>
+                        <td colspan="4" class="text-center py-4">
+                            <div class="alert alert-light">
+                                <i class="bi bi-info-circle me-2"></i>Нет созданных экзаменационных дат
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -132,69 +413,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    .admin-container {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .elegant-form {
-        margin-top: 1.5rem;
-    }
-
-    .commission-list {
-        margin: 0;
-        padding-left: 1.2rem;
-    }
-
-    .commission-list li {
-        margin-bottom: 0.3rem;
-    }
-
-    .action-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .btn-sm {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-    }
-
-    @media (max-width: 768px) {
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .btn-sm {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        color: white;
-    }
-    
-    .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
-    }
-    
-    /* Для мобильной адаптации */
-    @media (max-width: 768px) {
-        .action-buttons form {
-            width: 100%;
-        }
-        
-        .action-buttons button {
-            width: 100%;
-            margin-top: 5px;
-        }
-    }
-
-</style>
 {% endblock %}
