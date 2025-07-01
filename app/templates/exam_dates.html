@@ -2,14 +2,12 @@
 
 {% block content %}
 <style>
-    /* Основные стили контейнера */
     .admin-container {
         max-width: 1400px;
         margin: 2rem auto;
         padding: 0 1rem;
     }
 
-    /* Заголовки */
     .admin-container h2 {
         color: #2c3e50;
         font-weight: 700;
@@ -24,7 +22,6 @@
         margin-bottom: 1.5rem;
     }
 
-    /* Карточки */
     .content-card {
         background: #fff;
         border-radius: 12px;
@@ -38,7 +35,6 @@
         margin-bottom: 3rem;
     }
 
-    /* Формы */
     .elegant-form .form-group {
         margin-bottom: 1.5rem;
     }
@@ -65,7 +61,6 @@
         background-color: #fff;
     }
 
-    /* Кнопки */
     .btn-elegant {
         border-radius: 8px;
         font-weight: 500;
@@ -122,7 +117,6 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
 
-    /* Таблица */
     .elegant-table {
         width: 100%;
         border-collapse: separate;
@@ -159,7 +153,6 @@
         color: #34495e;
     }
 
-    /* Список комиссии */
     .commission-list {
         margin: 0;
         padding-left: 1.2rem;
@@ -180,7 +173,6 @@
         left: 0;
     }
 
-    /* Кнопки действий */
     .action-buttons {
         display: flex;
         flex-wrap: wrap;
@@ -193,15 +185,36 @@
         border-radius: 6px;
     }
 
-    /* Сообщение о пустой таблице */
     .text-center.py-4 {
         color: #7f8c8d;
         font-style: italic;
     }
 
+    .program-code {
+        font-weight: bold;
+        background-color: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        display: inline-block;
+        margin-right: 8px;
+    }
     
+    .search-hint {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
 
-    /* Адаптивность */
     @media (max-width: 992px) {
         .content-card {
             padding: 1.5rem;
@@ -270,29 +283,6 @@
             width: 100%;
         }
     }
-
-        .program-code {
-        font-weight: bold;
-        background-color: #e9ecef;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: monospace;
-        display: inline-block;
-        margin-right: 8px;
-        }
-        
-        .search-hint {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 4px;
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 2rem;
-            color: #6c757d;
-        }
-
 </style>
 
 <div class="admin-container">
@@ -340,7 +330,7 @@
                             value="{{ program_filter }}"
                             placeholder="Введите название или код программы">
                         <div class="search-hint">
-                            Введите код программы или название направления
+                            Поиск не чувствителен к регистру. Например: "прогр" или "ПРОГР"
                         </div>
                     </div>
                 </div>
@@ -437,7 +427,7 @@
         <div class="no-results">
             <i class="bi bi-search" style="font-size: 3rem; margin-bottom: 1rem;"></i>
             <h4>Ничего не найдено</h4>
-            <p>Попробуйте изменить параметры фильтра</p>
+            <p>Попробуйте изменить параметры фильтра или использовать другой запрос</p>
         </div>
         {% endif %}
     </div>

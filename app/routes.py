@@ -16,6 +16,7 @@ import os
 from io import BytesIO
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
+from sqlalchemy import func
 
 routes = Blueprint('routes', __name__)
 
@@ -219,7 +220,7 @@ def exam_dates():
     
     # Получаем параметры фильтрации и сортировки из запроса
     sort_order = request.args.get('sort', 'desc')  # asc или desc
-    program_filter = ' '.join(request.args.get('program_filter', '').strip())
+    program_filter = request.args.get('program_filter', '').strip()
     
     # Базовый запрос
     if current_user.role == 'secretary':
@@ -229,19 +230,18 @@ def exam_dates():
     else:
         query = ExamDate.query
     
-    # Применяем фильтр по названию программы (регистронезависимый)
+    # Применяем фильтр по названию программы или коду (регистронезависимый)
     if program_filter:
         # Создаем универсальный регистронезависимый фильтр
         pattern = f"%{program_filter}%"
         
-        # Проверяем тип базы данных
+        # Для SQLite используем lower()
         if db.engine.url.drivername == 'sqlite':
-            # Для SQLite используем lower()
             pattern_lower = pattern.lower()
             query = query.join(Program).filter(
                 db.or_(
-                    db.func.lower(Program.name).like(pattern_lower),
-                    db.func.lower(Program.code).like(pattern_lower)
+                    func.lower(Program.name).like(func.lower(pattern)),
+                    func.lower(Program.code).like(func.lower(pattern))
                 )
             )
         else:

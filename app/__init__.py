@@ -61,7 +61,7 @@ def create_app():
     def handle_exception(e):
         # Логируем ошибку
         app.logger.error(f"Unhandled Exception: {str(e)}")
-        return render_template('500.html'), 500
+        return render_template('404.html'), 400
 
     # Создание таблиц
     with app.app_context():
