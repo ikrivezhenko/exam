@@ -1126,18 +1126,18 @@ def upload_schedule():
                         if not all(pd.notna(row[field]) for field in ['Ф', 'И', 'О']):
                             raise ValueError("Отсутствует обязательное поле ФИО")
                         
-                        # 2. Собираем ФИО в одну строку
                         full_name = f"{row['Ф']} {row['И']} {row['О']}".strip()
                         
-                        program_code = str(row['Дисциплина']).split()[0] if pd.notna(row['Дисциплина']) else ''
-            
-                        # Название - остальная часть строки
-                        program_name = ' '.join(str(row['Дисциплина']).split()[1:]) if pd.notna(row['Дисциплина']) else ''
+                        # 2. Извлекаем данные программы
+                        discipline = str(row['Дисциплина']) if pd.notna(row['Дисциплина']) else ''
+                        parts = discipline.split(maxsplit=1)
+                        program_code = parts[0] if parts else ''
+                        program_name = parts[1].strip() if len(parts) > 1 else "Не указано"
                         
-                        if not program_code:
-                            raise ValueError("Не указан код программы")
-
-                        # Создаем или находим программу
+                        # 3. Обработка ООП: если пустое - используем название направления
+                        oop_name = str(row['ООП']).strip() if pd.notna(row.get('ООП', '')) else program_name
+                        
+                        # 4. Находим или создаем программу
                         program = Program.query.filter_by(code=program_code).first()
                         if not program:
                             program = Program(
@@ -1146,37 +1146,29 @@ def upload_schedule():
                                 school_id=current_user.school_id if current_user.role == 'secretary' else None
                             )
                             db.session.add(program)
-                            # Для новых программ сразу создаем ООП
-                            oop = Oop(
-                                name=str(row['ООП']).strip() if pd.notna(row.get('ООП', '')) else 'Не указано',
-                                program_id=program.id
-                            )
+                            db.session.flush()  # Получаем ID без коммита
+                        
+                        # 5. Создаем ООП только если его нет для этой программы
+                        oop_exists = any(o.name == oop_name for o in program.oop)
+                        if not oop_exists:
+                            oop = Oop(name=oop_name, program_id=program.id)
                             db.session.add(oop)
-                        else:
-                            # Для существующих программ обновляем ООП
-                            if program.oop:
-                                program.oop[0].name = str(row['ООП']).strip()
-                            else:
-                                oop = Oop(
-                                    name=str(row['ООП']).strip() if pd.notna(row.get('ООП', '')) else 'Не указано',
-                                    program_id=program.id
-                                )
-                                db.session.add(oop)
-                        # 4. Обработка даты экзамена
+                        
+                        # 6. Обработка даты экзамена
                         exam_datetime = None
                         if pd.notna(row['Дата/Время экз']):
                             try:
-                                # Пробуем разные форматы дат
-                                exam_datetime = pd.to_datetime(row['Дата/Время экз'], errors='coerce')
-                                if pd.isna(exam_datetime):
-                                    exam_datetime = pd.to_datetime(row['Дата/Время экз'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
-                                if pd.isna(exam_datetime):
-                                    exam_datetime = pd.to_datetime(row['Дата/Время экз'], format='%d.%m.%Y %H:%M', errors='coerce')
+                                exam_datetime = pd.to_datetime(
+                                    row['Дата/Время экз'], 
+                                    errors='coerce',
+                                    format='mixed'
+                                )
                             except Exception as e:
                                 current_app.logger.error(f"Ошибка преобразования даты: {str(e)}")
                         
+                        # 7. Создаем экзаменационную дату (если указана)
+                        exam_date = None
                         if exam_datetime and not pd.isna(exam_datetime):
-                            # Поиск или создание даты экзамена
                             exam_date = ExamDate.query.filter_by(
                                 date=exam_datetime,
                                 program_id=program.id
@@ -1188,30 +1180,30 @@ def upload_schedule():
                                     program_id=program.id
                                 )
                                 db.session.add(exam_date)
-                                db.session.commit()
-                            
-                            # 5. Поиск абитуриента
-                            applicant = Applicant.query.filter_by(
+                        
+                        # 8. Обработка абитуриента
+                        applicant = Applicant.query.filter_by(
+                            full_name=full_name,
+                            program_id=program.id
+                        ).first()
+                        
+                        if not applicant:
+                            applicant = Applicant(
                                 full_name=full_name,
-                                program_id=program.id
-                            ).first()
-                            
-                            if not applicant:
-                                applicant = Applicant(
-                                    full_name=full_name,
-                                    program_id=program.id,
-                                    exam_date_id=exam_date.id
-                                )
-                                db.session.add(applicant)
-                            else:
-                                # Обновляем дату экзамена
-                                applicant.exam_date_id = exam_date.id
-                            
-                            db.session.commit()
-                    
+                                program_id=program.id,
+                                exam_date_id=exam_date.id if exam_date else None
+                            )
+                            db.session.add(applicant)
+                        elif exam_date:
+                            applicant.exam_date_id = exam_date.id
+                        
+                        db.session.commit()
+
                     except Exception as e:
+                        db.session.rollback()
                         flash(f'Ошибка в строке {index + 1}: {str(e)}', 'error')
                         current_app.logger.error(f"Ошибка обработки строки {index + 1}", exc_info=True)
+
                 
                 flash('Расписание успешно загружено!', 'success')
             
