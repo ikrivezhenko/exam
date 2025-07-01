@@ -199,6 +199,8 @@
         font-style: italic;
     }
 
+    
+
     /* Адаптивность */
     @media (max-width: 992px) {
         .content-card {
@@ -268,6 +270,29 @@
             width: 100%;
         }
     }
+
+        .program-code {
+        font-weight: bold;
+        background-color: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        display: inline-block;
+        margin-right: 8px;
+        }
+        
+        .search-hint {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
 </style>
 
 <div class="admin-container">
@@ -313,7 +338,10 @@
                             id="program_filter"
                             name="program_filter"
                             value="{{ program_filter }}"
-                            placeholder="Введите название или код">
+                            placeholder="Введите название или код программы">
+                        <div class="search-hint">
+                            Введите код программы или название направления
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -346,6 +374,8 @@
     <!-- Карточка списка дат -->
     <div class="content-card">
         <h3><i class="bi bi-list-check me-2"></i>Список экзаменационных дат</h3>
+        
+        {% if exam_dates %}
         <div class="table-responsive">
             <table class="elegant-table">
                 <thead>
@@ -361,7 +391,7 @@
                     <tr>
                         <td data-label="Дата"><strong>{{ exam_date.date.strftime('%d.%m.%Y') }}</strong></td>
                         <td data-label="Программа">
-                            <span class="badge bg-light text-dark">{{ exam_date.program.code }}</span>
+                            <span class="program-code" title="Код программы">{{ exam_date.program.code }}</span>
                             {{ exam_date.program.name }}
                         </td>
                         <td data-label="Комиссия">
@@ -399,18 +429,17 @@
                             </div>
                         </td>
                     </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center py-4">
-                            <div class="alert alert-light">
-                                <i class="bi bi-info-circle me-2"></i>Нет созданных экзаменационных дат
-                            </div>
-                        </td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="no-results">
+            <i class="bi bi-search" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h4>Ничего не найдено</h4>
+            <p>Попробуйте изменить параметры фильтра</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

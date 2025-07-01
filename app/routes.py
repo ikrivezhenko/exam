@@ -219,7 +219,7 @@ def exam_dates():
     
     # Получаем параметры фильтрации и сортировки из запроса
     sort_order = request.args.get('sort', 'desc')  # asc или desc
-    program_filter = request.args.get('program_filter', '').strip()
+    program_filter = ' '.join(request.args.get('program_filter', '').strip())
     
     # Базовый запрос
     if current_user.role == 'secretary':
@@ -229,14 +229,29 @@ def exam_dates():
     else:
         query = ExamDate.query
     
-    # Применяем фильтр по названию программы
+    # Применяем фильтр по названию программы (регистронезависимый)
     if program_filter:
-        query = query.join(Program).filter(
-            db.or_(
-                Program.name.ilike(f'%{program_filter}%'),
-                Program.code.ilike(f'%{program_filter}%')
+        # Создаем универсальный регистронезависимый фильтр
+        pattern = f"%{program_filter}%"
+        
+        # Проверяем тип базы данных
+        if db.engine.url.drivername == 'sqlite':
+            # Для SQLite используем lower()
+            pattern_lower = pattern.lower()
+            query = query.join(Program).filter(
+                db.or_(
+                    db.func.lower(Program.name).like(pattern_lower),
+                    db.func.lower(Program.code).like(pattern_lower)
+                )
             )
-        )
+        else:
+            # Для других БД (PostgreSQL) используем ilike
+            query = query.join(Program).filter(
+                db.or_(
+                    Program.name.ilike(pattern),
+                    Program.code.ilike(pattern)
+                )
+            )
     
     # Применяем сортировку
     if sort_order == 'asc':
@@ -251,7 +266,6 @@ def exam_dates():
         sort_order=sort_order,
         program_filter=program_filter
     )
-
 
 @routes.route('/edit_program/<int:program_id>', methods=['GET', 'POST'])
 @login_required
