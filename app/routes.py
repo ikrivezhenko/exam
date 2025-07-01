@@ -1137,8 +1137,17 @@ def upload_schedule():
                         # 3. Обработка ООП: если пустое - используем название направления
                         oop_name = str(row['ООП']).strip() if pd.notna(row.get('ООП', '')) else program_name
                         
-                        # 4. Находим или создаем программу
-                        program = Program.query.filter_by(code=program_code).first()
+                        # 4. Ищем программу с таким кодом и ООП
+                        program = None
+                        # Поиск по связанным ООП
+                        programs = Program.query.filter_by(code=program_code).all()
+                        for p in programs:
+                            # Проверяем, есть ли у программы ООП с нужным именем
+                            if any(o.name == oop_name for o in p.oop):
+                                program = p
+                                break
+                        
+                        # 5. Если программа не найдена - создаем новую
                         if not program:
                             program = Program(
                                 code=program_code,
@@ -1147,10 +1156,8 @@ def upload_schedule():
                             )
                             db.session.add(program)
                             db.session.flush()  # Получаем ID без коммита
-                        
-                        # 5. Создаем ООП только если его нет для этой программы
-                        oop_exists = any(o.name == oop_name for o in program.oop)
-                        if not oop_exists:
+                            
+                            # Создаем ООП для программы
                             oop = Oop(name=oop_name, program_id=program.id)
                             db.session.add(oop)
                         
