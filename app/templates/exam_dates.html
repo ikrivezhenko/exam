@@ -389,7 +389,13 @@
                                 {% for member in exam_date.commission %}
                                 <li>{{ member.user.full_name }} <small class="text-muted">({{ member.role }})</small></li>
                                 {% else %}
-                                <li class="text-muted">Комиссия не назначена</li>
+                                <li class="text-muted">
+                                    {% if exam_date.program.standard_commission %}
+                                    <i class="bi bi-exclamation-triangle text-warning"></i> Стандартная комиссия не применена
+                                    {% else %}
+                                    <i class="bi bi-info-circle"></i> Комиссия не назначена
+                                    {% endif %}
+                                </li>
                                 {% endfor %}
                             </ul>
                         </td>

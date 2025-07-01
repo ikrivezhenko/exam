@@ -74,7 +74,7 @@ def format_role(role):
         return 'заместитель председателя'
     elif any(x in role_lower for x in ['председатель', 'пред']):
         return 'председатель комиссии'
-    return role
+    return role.capitalize()
 
 
 def create_table_element(width="5000", border_size="4", border_color="000000"):

@@ -214,8 +214,13 @@ def exam_dates():
             program_id=form.program_id.data
         )
         db.session.add(exam_date)
+        db.session.flush()  # Получаем ID перед коммитом
+        
+        # Копируем стандартную комиссию
+        exam_date.copy_standard_commission()
+        
         db.session.commit()
-        flash('Дата экзамена добавлена')
+        flash('Дата экзамена добавлена с автоматическим назначением стандартной комиссии')
         return redirect(url_for('routes.exam_dates'))
     
     # Получаем параметры фильтрации и сортировки из запроса
@@ -266,6 +271,24 @@ def exam_dates():
         sort_order=sort_order,
         program_filter=program_filter
     )
+
+
+
+# routes.py (новая функция)
+@routes.route('/copy_standard_commission/<int:exam_date_id>', methods=['POST'])
+@login_required
+def copy_standard_commission(exam_date_id):
+    exam_date = ExamDate.query.get_or_404(exam_date_id)
+    
+    # Удаляем существующих членов комиссии
+    CommissionMember.query.filter_by(exam_date_id=exam_date_id).delete()
+    
+    # Копируем стандартную комиссию
+    exam_date.copy_standard_commission()
+    db.session.commit()
+    
+    flash('Стандартная комиссия успешно применена', 'success')
+    return redirect(url_for('routes.assign_commission', exam_date_id=exam_date_id))
 
 @routes.route('/edit_program/<int:program_id>', methods=['GET', 'POST'])
 @login_required

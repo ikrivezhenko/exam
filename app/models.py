@@ -30,7 +30,20 @@ class ExamDate(db.Model):
     date = db.Column(db.DateTime, nullable=False)
     program_id = db.Column(db.Integer, db.ForeignKey('program.id'), nullable=False)
     commission = db.relationship('CommissionMember', backref='exam_date', lazy=True, cascade='all, delete-orphan')  # Каскад
-    applicants = db.relationship('Applicant', backref='exam_date', lazy=True,cascade='all, delete-orphan',passive_deletes=True)  # Обрабатывается отдельно
+    applicants = db.relationship('Applicant', backref='exam_date', lazy=True,cascade='all, delete-orphan',passive_deletes=True)
+    def copy_standard_commission(self):
+        """Копирует стандартную комиссию программы в текущую дату экзамена"""
+        standard_members = StandardCommission.query.filter_by(
+            program_id=self.program_id
+        ).all()
+        
+        for member in standard_members:
+            commission_member = CommissionMember(
+                exam_date_id=self.id,
+                user_id=member.user_id,
+                role=member.role
+            )
+            db.session.add(commission_member)  # Обрабатывается отдельно
 
 class CommissionMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
