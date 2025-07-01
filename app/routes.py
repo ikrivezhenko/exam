@@ -238,25 +238,19 @@ def exam_dates():
     # Применяем фильтр по названию программы или коду (регистронезависимый)
     if program_filter:
         # Создаем универсальный регистронезависимый фильтр
-        pattern = f"%{program_filter}%"
         
         # Для SQLite используем lower()
-        if db.engine.url.drivername == 'sqlite':
-            pattern_lower = pattern.lower()
-            query = query.join(Program).filter(
-                db.or_(
-                    func.lower(Program.name).like(func.lower(pattern)),
-                    func.lower(Program.code).like(func.lower(pattern))
-                )
+        pattern = f"%{program_filter}%"
+    
+    # Для всех БД используем единый подход
+        query = query.join(Program).filter(
+            db.or_(
+                Program.name.ilike(pattern) if hasattr(Program.name, 'ilike') 
+                    else Program.name.like(pattern, escape='\\').collate("NOCASE"),
+                Program.code.ilike(pattern) if hasattr(Program.code, 'ilike') 
+                    else Program.code.like(pattern, escape='\\').collate("NOCASE")
             )
-        else:
-            # Для других БД (PostgreSQL) используем ilike
-            query = query.join(Program).filter(
-                db.or_(
-                    Program.name.ilike(pattern),
-                    Program.code.ilike(pattern)
-                )
-            )
+        )
     
     # Применяем сортировку
     if sort_order == 'asc':
