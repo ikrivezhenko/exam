@@ -875,7 +875,7 @@ def edit_score(score_id):
     applicant = score.applicant
     exam_date = applicant.exam_date
     
-    if (exam_date.date.date() != date.today() and current_user.role not in ['admin']):
+    if (exam_date.date.date() != date.today() and current_user.role not in ['admin', 'secretary']):
         flash('Редактирование баллов возможно только в день экзамена')
         return redirect(url_for('routes.enter_scores'))
     
@@ -905,7 +905,7 @@ def delete_score(score_id):
     applicant_id = score.applicant.id
     exam_date = score.applicant.exam_date
     
-    if (exam_date.date.date() != date.today() and current_user.role not in ['admin']):
+    if (exam_date.date.date() != date.today() and current_user.role not in ['admin','secretary']):
         flash('Удаление баллов возможно только в день экзамена')
         return redirect(url_for('routes.enter_scores'))
     
