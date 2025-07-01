@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_users.css') }}">
+{% endblock %}
 <div class="spacer-lg">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h1>Управление пользователями</h1>

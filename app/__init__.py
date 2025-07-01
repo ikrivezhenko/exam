@@ -17,8 +17,8 @@ def create_app():
 
     # Формируем путь к папке с шаблонами
     template_path = os.path.join(base_dir, 'templates')
-
-    app = Flask(__name__, template_folder=template_path)
+    static_path = os.path.join(base_dir, 'static')
+    app = Flask(__name__, template_folder=template_path,static_folder=static_path)
 
     # Конфигурация
     app.config['SECRET_KEY'] = 'your_secret_key_here'
