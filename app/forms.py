@@ -110,7 +110,7 @@ class EditScoreForm(FlaskForm):
 
 
 class QuestionForm(FlaskForm):
-    text = TextAreaField('Текст вопроса', validators=[DataRequired()])
+    questions_text = TextAreaField('Вопросы (каждый с новой строки)', validators=[DataRequired()])
     program_id = SelectField('Программа', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Добавить')
 

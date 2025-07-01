@@ -4,13 +4,12 @@
 <div class="spacer-lg">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h1>Управление вопросами</h1>
-        
     </div>
 
-    <!-- Форма добавления нового вопроса -->
+    <!-- Форма добавления новых вопросов -->
     <div class="card-elegant mb-5" id="addQuestionForm">
         <div class="card-header-elegant">
-            <h2><i class="bi bi-plus-circle"></i> Добавить новый вопрос</h2>
+            <h2><i class="bi bi-plus-circle"></i> Добавить вопросы</h2>
         </div>
         <div class="card-body">
             <form method="POST">
@@ -22,15 +21,23 @@
                             <label>Образовательная программа</label>
                         </div>
                     </div>
-                    <div class="col-md-12 mt-3">
-                        <div class="form-floating">
-                            {{ form.text(class="form-control-elegant", placeholder="Текст вопроса", style="height: 120px; width: 620px") }}
-                            
+                    <!-- Измененное поле для ввода нескольких вопросов -->
+                    <div class="col-12 mt-3">
+                        <div class="form-group">
+                            <label for="questions_text">Вопросы (по одному на строку)</label>
+                            {{ form.questions_text(
+                                class="form-control-elegant",
+                                rows=7,
+                                placeholder="Введите вопросы, каждый с новой строки"
+                            ) }}
+                            <small class="form-text text-muted">
+                                Каждая новая строка - отдельный вопрос
+                            </small>
                         </div>
                     </div>
-                    <div class="col-md-12 mt-3">
+                    <div class="col-12 mt-3">
                         <button type="submit" class="btn btn-primary-elegant">
-                            <i class="bi bi-plus-lg"></i> Добавить вопрос
+                            <i class="bi bi-plus-lg"></i> Добавить вопросы
                         </button>
                     </div>
                 </div>

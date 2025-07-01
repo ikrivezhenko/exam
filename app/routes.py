@@ -816,40 +816,50 @@ def delete_standard_commission(commission_id):
     flash('Член стандартной комиссии удален')
     return redirect(url_for('routes.standard_commission'))
 
-# Управление вопросами
+
 @routes.route('/questions', methods=['GET', 'POST'])
 @login_required
 def questions():
     if current_user.role not in ['admin', 'secretary']:
         abort(403)
-    
+
     form = QuestionForm()
-    
-    # Фильтрация программ для секретаря
+
     if current_user.role == 'secretary':
         form.program_id.choices = [
-            (p.id, f"{p.code} {p.name}") 
+            (p.id, f"{p.code} {p.name}")
             for p in Program.query.filter_by(school_id=current_user.school_id)
         ]
-    
+
     if form.validate_on_submit():
-        question = Question(
-            text=form.text.data,
-            program_id=form.program_id.data
-        )
-        db.session.add(question)
-        db.session.commit()
-        flash('Вопрос добавлен')
+        # Разбиваем текст на строки и обрабатываем каждую
+        questions_added = 0
+        for line in form.questions_text.data.split('\n'):
+            text = line.strip()
+            if text:  # Пропускаем пустые строки
+                question = Question(
+                    text=text,
+                    program_id=form.program_id.data
+                )
+                db.session.add(question)
+                questions_added += 1
+
+        if questions_added > 0:
+            db.session.commit()
+            flash(f'Добавлено вопросов: {questions_added}')
+        else:
+            flash('Не найдено вопросов для добавления', 'warning')
+
         return redirect(url_for('routes.questions'))
-    
+
     # Фильтрация вопросов
     if current_user.role == 'secretary':
         questions = Question.query.join(Program).filter(
             Program.school_id == current_user.school_id
         ).all()
-    else:  # admin
+    else:
         questions = Question.query.all()
-    
+
     return render_template('questions.html', form=form, questions=questions)
 
 @routes.route('/delete_question/<int:question_id>', methods=['POST'])
