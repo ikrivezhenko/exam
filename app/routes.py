@@ -663,7 +663,7 @@ def view_protocol(applicant_id):
     doc.save(buffer)
     buffer.seek(0)
     
-    filename = f"protocol_{applicant.id}.docx"
+    filename = re.sub(r'[\\/*?:"<>|]', '-',f"Протокол {applicant.full_name} ({exam_date.date}).docx")
     return send_file(
         buffer,
         as_attachment=True,
@@ -690,7 +690,7 @@ def view_vedomost(exam_date_id):
     doc.save(buffer)
     buffer.seek(0)
     
-    filename = f"vedomost_{exam_date.id}.docx"
+    filename = re.sub(r'[\\/*?:"<>|]', '-', f"Ведомость {exam_date.program.name} ({exam_date.date}).docx")
     return send_file(
         buffer,
         as_attachment=True,
