@@ -1,52 +1,454 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="spacer-lg">
-    <h1>Выставление баллов для: {{ applicant.full_name }}</h1>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <div class="row spacer-lg">
-        <div class="col-lg-6">
-            <div class="card-elegant">
-                <div class="card-header-elegant">
-                    <h2><i class="bi bi-info-circle"></i> Информация</h2>
+<style>
+
+    /* Добавьте эти стили в ваш CSS блок */
+.total-score-container {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    min-width: 200px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+}
+
+.total-score-value {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    color: white;
+}
+
+.total-score-status {
+    font-size: 1.25rem;
+    font-weight: 500;
+    padding: 6px 20px;
+    border-radius: 50px;
+}
+
+
+
+/* Для мобильной адаптации */
+@media (max-width: 768px) {
+    .total-score-container {
+        width: 100%;
+        margin-top: 20px;
+        padding: 20px;
+    }
+
+    .total-score-value {
+        font-size: 2.5rem;
+    }
+
+    .total-score-status {
+        font-size: 1.1rem;
+    }
+}
+
+    /* Основные стили */
+    .scoring-container {
+        padding: 20px 0;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .applicant-header {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        color: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .applicant-title {
+        font-size: 1.9rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .applicant-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+        margin-top: 15px;
+        font-size: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.1);
+        padding: 8px 15px;
+        border-radius: 8px;
+    }
+
+    .total-score-badge {
+        font-size: 1.5rem;
+        padding: 10px 25px;
+        border-radius: 50px;
+        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.25);
+        font-weight: 600;
+    }
+
+    .total-score-fail {
+        background: rgba(220, 53, 69, 0.25) !important;
+        border-color: rgba(220, 53, 69, 0.4) !important;
+    }
+
+    .card-elegant {
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 30px;
+        height: 100%;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .card-header-elegant {
+        background: linear-gradient(135deg, #4caf50, #2e7d32);
+        color: white;
+        padding: 18px 25px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .card-header-elegant h2 {
+        font-size: 1.35rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    .form-control-elegant {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 1rem;
+    }
+
+    .form-control-elegant:focus {
+        border-color: #4caf50;
+        box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+    }
+
+    .btn-primary-elegant {
+        color: white !important;
+        background: linear-gradient(135deg, #4caf50, #2e7d32);
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-weight: 500;
+        font-size: 1.05rem;
+    }
+
+    .elegant-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+    }
+
+    .elegant-table th {
+        background-color: #f8f9fa;
+        color: #2e7d32;
+        font-weight: 600;
+        padding: 15px 20px;
+        text-align: left;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .elegant-table td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .elegant-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .btn-outline-elegant {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 7px 12px;
+        color: #5a6268;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+    }
+
+    .no-scores-card {
+        text-align: center;
+        padding: 40px 30px;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        border: 1px dashed #e0e0e0;
+    }
+
+    .no-scores-icon {
+        font-size: 3.5rem;
+        color: #ced4da;
+        margin-bottom: 20px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .badge-score {
+        font-size: 1.05rem;
+        padding: 8px 15px;
+        border-radius: 50px;
+        background: #e8f5e9;
+        color: #2e7d32;
+        font-weight: 500;
+    }
+
+    .badge-score-fail {
+        background: #f8d7da;
+        color: #dc3545;
+    }
+
+    /* Стили для Select2 */
+    .select2-container--default .select2-selection--single {
+        height: 52px;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 10px !important;
+        background: #f8f9fa;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 52px !important;
+        padding-left: 18px !important;
+        font-size: 1rem;
+        color: #495057;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 50px !important;
+        width: 40px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: #6c757d transparent transparent transparent;
+        border-width: 6px 6px 0 6px;
+    }
+
+    .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+        border-color: transparent transparent #6c757d transparent;
+        border-width: 0 6px 6px 6px;
+    }
+
+    .select2-dropdown {
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        overflow: hidden;
+    }
+
+    .select2-results__option {
+        padding: 12px 18px;
+    }
+
+    .select2-results__option--highlighted {
+        background-color: #e8f5e9 !important;
+        color: #2e7d32 !important;
+    }
+
+    /* Мобильная адаптация */
+    @media (max-width: 992px) {
+        .applicant-header {
+            padding: 20px;
+        }
+
+        .applicant-title {
+            font-size: 1.6rem;
+        }
+
+        .applicant-meta {
+            gap: 15px;
+        }
+
+        .meta-item {
+            padding: 7px 12px;
+            font-size: 0.95rem;
+        }
+
+        .total-score-badge {
+            font-size: 1.3rem;
+            padding: 8px 20px;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .applicant-header {
+            padding: 18px 15px;
+            text-align: center;
+        }
+
+        .applicant-title {
+            font-size: 1.4rem;
+        }
+
+        .applicant-meta {
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .meta-item {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .card-header-elegant h2 {
+            font-size: 1.2rem;
+        }
+
+        .elegant-table th,
+        .elegant-table td {
+            padding: 12px 15px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-control-elegant {
+            padding: 12px 15px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .scoring-container {
+            padding: 15px 0;
+        }
+
+        .applicant-title {
+            font-size: 1.3rem;
+        }
+
+        .card-header-elegant {
+            padding: 15px 20px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .elegant-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .elegant-table th,
+        .elegant-table td {
+            padding: 10px 12px;
+            font-size: 0.92rem;
+        }
+
+        .btn-primary-elegant {
+            padding: 12px;
+            font-size: 1rem;
+        }
+
+        .no-scores-card {
+            padding: 30px 20px;
+        }
+    }
+</style>
+
+<div class="scoring-container">
+    {% set total_score = applicant.scores | sum(attribute='score') %}
+    <div class="applicant-header">
+    <div class="d-flex flex-column flex-md-row justify-content-between">
+        <div class="mb-3 mb-md-0">
+            <h1 class="applicant-title">Выставление баллов</h1>
+            <div class="d-flex flex-column mt-3">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-person-circle fs-4 me-3"></i>
+                    <span class="fs-4 fw-medium">{{ applicant.full_name }}</span>
                 </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="fw-bold">Программа:</span>
-                            <span>{{ applicant.program.code }} {{ applicant.program.name }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="fw-bold">Дата экзамена:</span>
-                            <span>{{ applicant.exam_date.date.strftime('%d.%m.%Y') }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="fw-bold">Общий балл:</span>
-                            <span class="badge bg-primary fs-5">
-                                {{ applicant.scores | sum(attribute='score') }}/100
-                            </span>
-                        </li>
-                    </ul>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="meta-item">
+                        <i class="bi bi-journal-bookmark"></i>
+                        <div>
+                            <div class="text-uppercase small opacity-75">Программа</div>
+                            <div>{{ applicant.program.code }} {{ applicant.program.name }}</div>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <i class="bi bi-calendar-event"></i>
+                        <div>
+                            <div class="text-uppercase small opacity-75">Дата экзамена</div>
+                            <div>{{ applicant.exam_date.date.strftime('%d.%m.%Y') }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="card-elegant mt-4">
+        <div class="total-score-container d-flex flex-column align-items-center justify-content-center p-4">
+            <div class="total-score-value mb-2">
+                {{ total_score }}<span class="opacity-75">/100</span>
+            </div>
+            <div class="total-score-status">
+                {% if total_score >= 56 %}
+                    <span class="status-pass">Проходной балл</span>
+                {% else %}
+                    <span class="status-fail">Непроходной балл</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card-elegant">
                 <div class="card-header-elegant">
                     <h2><i class="bi bi-plus-circle"></i> Добавить оценку</h2>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" class="elegant-form">
                         {{ form.hidden_tag() }}
                         <div class="mb-4">
-                            {{ form.question_id.label(class="form-label fw-bold") }}
-                            {{ form.question_id(class="form-control-elegant form-select") }}
+                            <label class="form-label fw-bold mb-2">Выберите вопрос</label>
+                            {{ form.question_id(class="form-control-elegant", id="question-select") }}
+                            <div class="form-text mt-1">Начните вводить текст для поиска вопроса</div>
                         </div>
                         <div class="mb-4">
-                            {{ form.score.label(class="form-label fw-bold") }}
-                            {{ form.score(class="form-control-elegant") }}
+                            <label class="form-label fw-bold mb-2">Количество баллов</label>
+                            {{ form.score(class="form-control-elegant", placeholder="Введите баллы") }}
                         </div>
-                        <button type="submit" class="btn btn-primary-elegant w-100">
-                            <i class="bi bi-plus-lg"></i> Добавить оценку
+                        <button type="submit" class="btn btn-primary-elegant w-100 mt-2">
+                            <i class="bi bi-plus-lg me-2"></i> Добавить оценку
                         </button>
                     </form>
                 </div>
@@ -65,8 +467,8 @@
                             <thead>
                                 <tr>
                                     <th>Вопрос</th>
-                                    <th width="120px">Балл</th>
-                                    <th width="150px">Действия</th>
+                                    <th>Балл</th>
+                                    <th>Действия</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,17 +476,21 @@
                                 <tr>
                                     <td>{{ score.question.text }}</td>
                                     <td>
-                                        <span class="badge bg-primary fs-6">{{ score.score }}</span>
+                                        <span class="badge-score">
+                                            {{ score.score }}
+                                        </span>
                                     </td>
                                     <td>
-                                        <div class="btn-group">
+                                        <div class="action-buttons">
                                             <a href="{{ url_for('routes.edit_score', score_id=score.id) }}"
-                                               class="btn btn-outline-elegant btn-sm">
+                                               class="btn btn-outline-elegant"
+                                               title="Редактировать">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <form action="{{ url_for('routes.delete_score', score_id=score.id) }}" method="POST">
-                                                <button type="submit" class="btn btn-outline-elegant btn-sm"
-                                                        onclick="return confirm('Вы уверены?')">
+                                            <form action="{{ url_for('routes.delete_score', score_id=score.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-elegant"
+                                                        title="Удалить"
+                                                        onclick="return confirm('Вы уверены, что хотите удалить эту оценку?');">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
@@ -96,8 +502,12 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="alert alert-light text-center">
-                        <i class="bi bi-info-circle"></i> Нет оценок
+                    <div class="no-scores-card">
+                        <div class="no-scores-icon">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <h4 class="text-muted mb-2">Нет оценок</h4>
+                        <p class="text-muted mb-0">Добавьте оценки с помощью формы слева</p>
                     </div>
                     {% endif %}
                 </div>
@@ -105,4 +515,60 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Уничтожаем предыдущий экземпляр Select2 перед инициализацией
+        if ($('#question-select').hasClass('select2-hidden-accessible')) {
+            $('#question-select').select2('destroy');
+        }
+
+        // Инициализация Select2 с русской локализацией
+        $('#question-select').select2({
+            placeholder: "Поиск вопроса...",
+            allowClear: true,
+            language: {
+                noResults: function() {
+                    return "Вопросы не найдены";
+                },
+                searching: function() {
+                    return "Поиск...";
+                },
+                inputTooShort: function() {
+                    return "Введите 3 или более символов";
+                }
+            },
+            width: '100%',
+            dropdownParent: $('#question-select').closest('.card-body'),
+            escapeMarkup: function (markup) { return markup; }
+        });
+
+        // Закрытие выпадающего списка при клике вне его
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.select2-container').length) {
+                $('#question-select').select2('close');
+            }
+        });
+
+        // Автофокус на поле поиска при открытии
+        $('#question-select').on('select2:open', function() {
+            setTimeout(function() {
+                $('.select2-search__field').focus();
+            }, 100);
+        });
+
+        // Подсветка формы при ошибках
+        {% if form.errors %}
+            $('form').addClass('was-validated');
+            {% for field, errors in form.errors.items() %}
+                {% if field != 'csrf_token' %}
+                    $('#{{ form[field].id }}').addClass('is-invalid');
+                    $('#{{ form[field].id }}').after('<div class="invalid-feedback">' + '{{ errors|join(", ") }}' + '</div>');
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    });
+</script>
 {% endblock %}
