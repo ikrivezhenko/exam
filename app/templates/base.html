@@ -502,11 +502,11 @@
 
                     <a href="{{ url_for('routes.programs') }}" class="menu-item {% if request.endpoint == 'routes.programs' %}active{% endif %}">
                         <i class="bi bi-journal-bookmark"></i>
-                        <span>Программы</span>
+                        <span>Направления подготовки</span>
                     </a>
                     <a href="{{ url_for('routes.exam_dates') }}" class="menu-item {% if request.endpoint == 'routes.exam_dates' %}active{% endif %}">
                         <i class="bi bi-calendar-event"></i>
-                        <span>Даты экзаменов</span>
+                        <span>Управление ВИ</span>
                     </a>
                     <a href="{{ url_for('routes.applicants') }}" class="menu-item {% if request.endpoint == 'routes.applicants' %}active{% endif %}">
                         <i class="bi bi-people"></i>
@@ -514,15 +514,15 @@
                     </a>
                     <a href="{{ url_for('routes.standard_commission') }}" class="menu-item {% if request.endpoint == 'routes.standard_commission' %}active{% endif %}">
                         <i class="bi bi-person-badge"></i>
-                        <span>Комиссии</span>
+                        <span>Стандартные комиссии</span>
                     </a>
                     <a href="{{ url_for('routes.questions') }}" class="menu-item {% if request.endpoint == 'routes.questions' %}active{% endif %}">
                         <i class="bi bi-question-circle"></i>
-                        <span>Вопросы</span>
+                        <span>Вопросы ВИ</span>
                     </a>
                     <a href="{{ url_for('routes.upload_schedule') }}" class="menu-item {% if request.endpoint == 'routes.upload_schedule' %}active{% endif %}">
                         <i class="bi bi-upload"></i>
-                        <span>Загрузка данных</span>
+                        <span>Загрузка данных с дашборда</span>
                     </a>
                 </div>
                 {% endif %}
