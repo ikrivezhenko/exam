@@ -289,16 +289,21 @@ def generate_vedomost(exam_date):
     questions_data = [
         [['№ п/п', {'bold': True, 'size': '24'}], ['ФИО поступающего', {'bold': True, 'size': '24'}], ['Балл за ВИ', {'bold': True, 'size': '24'}]]
     ]
-    # Фильтруем абитуриентов - оставляем только тех, у кого есть вопросы (даже если все ответы 0)
-    present_applicants = [a for a in exam_date.applicants if getattr(a, 'scores', None)]
-    sorted_applicants = sorted(present_applicants, key=lambda x: x.full_name.lower(), reverse=True)
+
+    sorted_applicants = sorted(exam_date.applicants, key=lambda x: x.full_name.lower())
 
     for i, applicant in enumerate(sorted_applicants, start=1):
-        total_score = sum(score.score for score in applicant.scores) if applicant.scores else 0
+        # Проверяем наличие оценок (это признак того, что абитуриент присутствовал)
+        if applicant.scores:  # Если есть хотя бы одна оценка
+            total_score = sum(score.score for score in applicant.scores)
+            score_text = str(total_score)
+        else:
+            score_text = "неявка"  # Если оценок нет - неявка
+
         questions_data.append([
             [str(i), {'size': '24'}],
             [applicant.full_name, {'size': '24'}],
-            [str(total_score), {'size': '24'}]
+            [score_text, {'size': '24'}]
         ])
 
     insert_table_after_paragraph(
@@ -315,8 +320,8 @@ def generate_vedomost(exam_date):
         if member.role == 'председатель':
             continue
 
-        members_text += " " * 65 + f" ____________________ / {format_fio(member.user.full_name)} /\n"
-        members_text += " " * 65 + " ".ljust(12)+"(подпись)".ljust(30) + "(ФИО)\n\n"
+        members_text += " " * 55 + f" ____________________ / {format_fio(member.user.full_name)} /\n"
+        members_text += " " * 55 + " ".ljust(12)+"(подпись)".ljust(30) + "(ФИО)\n\n"
 
     # Добавляем параграф с подписями
     p = doc.add_paragraph(members_text)
