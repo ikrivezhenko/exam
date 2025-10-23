@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from . import db, bcrypt
 from .models import (Oop, User, Program, ExamDate, CommissionMember, Applicant, 
                     Question, Score, StandardCommission, EngineeringSchool)
-from .forms import (LoginForm, EngineeringSchoolForm, ProgramForm, ExamDateForm, 
+from .forms import (LoginForm, OAuthTPULoginForm, EngineeringSchoolForm, ProgramForm, ExamDateForm,
                    AssignCommissionForm, ApplicantForm, ScoreForm, UserForm, 
                    StandardCommissionForm, EditScoreForm, QuestionForm, 
                    UploadApplicantsForm, UploadScheduleForm)
@@ -17,6 +17,14 @@ from io import BytesIO
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
+import requests
+import secrets
+from urllib.parse import urlencode
+import time
+from flask import session
+import hashlib
+import base64
+import threading
 
 routes = Blueprint('routes', __name__)
 
@@ -43,6 +51,39 @@ def check_school_access(school_id):
         return school_id == current_user.school_id
     return False
 
+
+# Временное хранилище для OAuth данных (в памяти)
+# В продакшене замените на Redis или базу данных
+oauth_storage = {}
+
+
+def cleanup_oauth_storage():
+    """Очистка устаревших OAuth записей"""
+    while True:
+        current_time = time.time()
+        expired_states = []
+        for state, data in oauth_storage.items():
+            if current_time - data['timestamp'] > 600:  # 10 минут
+                expired_states.append(state)
+
+        for state in expired_states:
+            del oauth_storage[state]
+            print(f"Cleaned up expired state: {state}")
+
+        time.sleep(300)  # Проверяем каждые 5 минут
+
+
+# Запускаем очистку в фоновом потоке (только один раз!)
+cleanup_thread = threading.Thread(target=cleanup_oauth_storage, daemon=True)
+cleanup_thread.start()
+def generate_pkce():
+    """Генерация code_verifier и code_challenge для PKCE"""
+    code_verifier = secrets.token_urlsafe(64)
+    code_challenge = hashlib.sha256(code_verifier.encode()).digest()
+    code_challenge = base64.urlsafe_b64encode(code_challenge).decode().replace('=', '')
+    return code_verifier, code_challenge
+
+
 @routes.route('/')
 def home():
     if current_user.is_authenticated:
@@ -54,26 +95,203 @@ def home():
             return redirect(url_for('routes.enter_scores'))
     return redirect(url_for('routes.login'))
 
+
 @routes.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('routes.home'))
-    
+
     form = LoginForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for('routes.home'))
         flash('Неверный логин или пароль')
+
     return render_template('login.html', form=form)
+
+
+@routes.route('/oauth/tpu/login')
+def oauth_tpu_login():
+    # Генерируем state для защиты от CSRF
+    state = secrets.token_urlsafe(32)
+    code_verifier, code_challenge = generate_pkce()
+
+    # Сохраняем в временное хранилище
+    oauth_storage[state] = {
+        'code_verifier': code_verifier,
+        'timestamp': time.time()
+    }
+
+    # Также сохраняем в сессию для отладки
+    session['oauth_state'] = state
+    session['oauth_code_verifier'] = code_verifier
+    session.modified = True
+
+    print(f"State stored in memory: {state}")
+    print(f"OAuth storage keys: {list(oauth_storage.keys())}")
+
+    # Параметры для OAuth запроса
+    params = {
+        'client_id': 'my-app-221-50473644',
+        'redirect_uri': 'http://localhost:5000/oauth/callback',
+        'response_type': 'code',
+        'state': state,
+        'code_challenge': code_challenge,
+        'code_challenge_method': 'S256'
+    }
+
+    oauth_url = 'https://oauth.tpu.ru/authorize?' + urlencode(params)
+    print(f"OAuth URL: {oauth_url}")
+
+    return redirect(oauth_url)
+
+
+@routes.route('/oauth/callback')
+def oauth_callback():
+    request_state = request.args.get('state')
+    code = request.args.get('code')
+
+    print(f"Request state: {request_state}")
+    print(f"OAuth storage keys: {list(oauth_storage.keys())}")
+
+    # Проверяем state в временном хранилище
+    stored_data = oauth_storage.get(request_state)
+    if not stored_data:
+        print(f"State not found in storage: {request_state}")
+        flash('Ошибка безопасности при авторизации: state не найден')
+        return redirect(url_for('routes.login'))
+
+    # Проверяем timestamp (защита от повторного использования)
+    if time.time() - stored_data['timestamp'] > 600:  # 10 минут
+        del oauth_storage[request_state]
+        flash('Время авторизации истекло, попробуйте снова')
+        return redirect(url_for('routes.login'))
+
+    if not code:
+        flash('Ошибка авторизации: код не получен')
+        return redirect(url_for('routes.login'))
+
+    print(f"Code received: {code[:50]}...")
+
+    try:
+        # Получаем access token
+        token_params = {
+            'client_id': 'my-app-221-50473644',
+            'client_secret': 'NGit4Z0U',
+            'redirect_uri': 'http://localhost:5000/oauth/callback',
+            'code': code,
+            'grant_type': 'authorization_code',
+            'timestamp': int(time.time()),
+            'code_verifier': stored_data['code_verifier']
+        }
+
+        print(f"Making token request with params: { {k: v for k, v in token_params.items() if k != 'client_secret'} }")
+
+        token_response = requests.get(
+            'https://oauth.tpu.ru/access_token',
+            params=token_params
+        )
+
+        print(f"Token response status: {token_response.status_code}")
+        print(f"Token response headers: {token_response.headers}")
+        print(f"Token response text: {token_response.text}")
+
+        if token_response.status_code != 200:
+            error_msg = token_response.text
+            try:
+                error_json = token_response.json()
+                error_msg = error_json.get('error_description', error_msg)
+            except:
+                pass
+            flash(f'Ошибка получения токена доступа: {error_msg}')
+            return redirect(url_for('routes.login'))
+
+        token_json = token_response.json()
+        access_token = token_json.get('access_token')
+
+        if not access_token:
+            flash('Токен доступа не получен')
+            return redirect(url_for('routes.login'))
+
+        print(f"Access token received: {access_token[:50]}...")
+
+        # Получаем информацию о пользователе
+        headers = {'Authorization': f'Bearer {access_token}'}
+        user_response = requests.get('https://oauth.tpu.ru/user', headers=headers)
+
+        print(f"User response status: {user_response.status_code}")
+
+        if user_response.status_code != 200:
+            flash('Ошибка получения данных пользователя')
+            return redirect(url_for('routes.login'))
+
+        user_data = user_response.json()
+        print(f"User data received: {user_data}")
+
+        # Используем user_id из ТПУ
+        tpu_user_id = user_data.get('user_id')
+        if not tpu_user_id:
+            flash('Ошибка: не получен user_id от ТПУ')
+            return redirect(url_for('routes.login'))
+
+        # Ищем пользователя по tpu_id
+        user = User.query.filter_by(tpu_id=str(tpu_user_id)).first()
+
+        if not user:
+            # Создаем нового пользователя с ВСЕМИ обязательными полями
+            username = user_data.get('login') or user_data.get('email') or f"user_{tpu_user_id}"
+            full_name = user_data.get('full_name', 'Пользователь ТПУ')
+
+            # Генерируем случайный пароль (для OAuth пользователей он не используется)
+            random_password = bcrypt.generate_password_hash(secrets.token_urlsafe(32)).decode('utf-8')
+
+            user = User(
+                username=username,
+                password=random_password,  # Обязательное поле
+                full_name=full_name,  # Обязательное поле
+                position='Сотрудник ТПУ',  # Обязательное поле
+                role='commission',  # Обязательное поле
+                email=user_data.get('email'),
+                tpu_id=str(tpu_user_id)  # ID из системы ТПУ
+                # school_id можно оставить NULL
+            )
+            db.session.add(user)
+            db.session.commit()
+            print(f"Новый пользователь создан: {username} ({full_name})")
+
+        # Выполняем вход пользователя
+        login_user(user, remember=True)
+
+        # Удаляем использованные данные из временного хранилища
+        if request_state in oauth_storage:
+            del oauth_storage[request_state]
+
+        flash('Успешный вход через ТПУ!', 'success')
+        return redirect(url_for('routes.home'))
+
+    except Exception as e:
+        print(f"OAuth error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Ошибка при авторизации: {str(e)}')
+        return redirect(url_for('routes.login'))
+
 
 @routes.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('routes.login'))
 
+    # Очищаем сессию
+    session.clear()
+
+    redirect_uri = url_for('routes.login', _external=True)
+    tpu_logout_url = f"https://oauth.tpu.ru/auth/logout?redirect={redirect_uri}"
+
+    return redirect(tpu_logout_url)
 @routes.route('/static/cat.png')
 def serve_cat():
     try:

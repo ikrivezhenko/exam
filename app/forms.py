@@ -10,6 +10,9 @@ class LoginForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired()])
     submit = SubmitField('Войти')
 
+class OAuthTPULoginForm(FlaskForm):
+    submit = SubmitField('Войти через ТПУ')
+
 class EngineeringSchoolForm(FlaskForm):
     name = StringField('Название школы', validators=[DataRequired(), Length(min=2, max=100)])
     submit = SubmitField('Добавить')

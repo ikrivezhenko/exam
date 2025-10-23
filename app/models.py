@@ -1,5 +1,6 @@
 from . import db
 from flask_login import UserMixin
+from datetime import datetime, timedelta
 
 class EngineeringSchool(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,6 +18,11 @@ class User(UserMixin, db.Model):
     engineering_school = db.relationship('EngineeringSchool', backref='users')
     commission_members = db.relationship('CommissionMember', back_populates='user', cascade='all, delete-orphan')
     standard_commissions = db.relationship('StandardCommission', back_populates='user', cascade='all, delete-orphan')
+    tpu_id = db.Column(db.String(100), unique=True, nullable=True)  # ID из системы ТПУ
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 
 

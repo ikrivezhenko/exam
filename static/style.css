@@ -141,3 +141,40 @@ header {
         border: 1px solid #dee2e6;
     }
 }
+.btn-tpu-oauth {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    width: 100%;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-tpu-oauth:hover {
+    background-color: #0052a3;
+}
+
+.login-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.login-divider span {
+    background: white;
+    padding: 0 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.login-divider:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #ddd;
+    z-index: 0;
+}

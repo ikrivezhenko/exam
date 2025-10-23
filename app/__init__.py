@@ -1,4 +1,3 @@
-
 import os
 from flask import Flask, render_template
 from flask_login import LoginManager
@@ -12,20 +11,30 @@ bcrypt = Bcrypt()
 
 
 def create_app():
-    # Получаем абсолютный путь к директории приложения
     base_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Формируем путь к папке с шаблонами
     template_path = os.path.join(base_dir, 'templates')
     static_path = os.path.join(base_dir, 'static')
-    app = Flask(__name__, template_folder=template_path,static_folder=static_path)
+    app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 
-    # Конфигурация
-    app.config['SECRET_KEY'] = 'your_secret_key_here'
+    # ОБНОВЛЕННАЯ КОНФИГУРАЦИЯ СЕССИИ
+    app.config['SECRET_KEY'] = 'your_very_secret_key_here_change_this_in_production'
+    app.config['SESSION_PERMANENT'] = True
+    app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 час
+    app.config['SESSION_TYPE'] = 'filesystem'
+
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///exam_system.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = 'uploads'
     app.config['TEMPLATES_FOLDER'] = os.path.join(base_dir, 'word_templates')
+
+    # OAuth TPU Configuration
+    app.config['OAUTH_TPU_CLIENT_ID'] = 'my-app-221-50473644'
+    app.config['OAUTH_TPU_CLIENT_SECRET'] = 'NGit4Z0U'
+    app.config['OAUTH_TPU_REDIRECT_URI'] = 'http://localhost:5000/oauth/callback'
+    app.config['OAUTH_TPU_AUTHORIZE_URL'] = 'https://oauth.tpu.ru/authorize'
+    app.config['OAUTH_TPU_ACCESS_TOKEN_URL'] = 'https://oauth.tpu.ru/access_token'
+    app.config['OAUTH_TPU_USER_INFO_URL'] = 'https://oauth.tpu.ru/user'
+    app.config['OAUTH_TPU_CHECK_TOKEN_URL'] = 'https://oauth.tpu.ru/check-token'
 
     # Создаем папки, если не существуют
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
@@ -47,21 +56,20 @@ def create_app():
     # Регистрация blueprint
     from .routes import routes as main_blueprint
     app.register_blueprint(main_blueprint)
-    
+
     # Обработчики ошибок
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
-    
+
     @app.errorhandler(500)
     def internal_server_error(e):
         return render_template('500.html'), 500
-    
+
     @app.errorhandler(Exception)
     def handle_exception(e):
-        # Логируем ошибку
         app.logger.error(f"Unhandled Exception: {str(e)}")
-        return render_template('404.html'), 400
+        return render_template('500.html'), 500
 
     # Создание таблиц
     with app.app_context():
