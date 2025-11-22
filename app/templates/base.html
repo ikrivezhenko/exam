@@ -560,15 +560,19 @@
 
                 <nav class="user-nav">
                     {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('routes.logout') }}" class="logout-btn">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Выйти</span>
-                    </a>
+                    <li class="nav-item">
+                        <form action="{{ url_for('routes.logout') }}" method="POST" style="display: inline;">
+                            <button type="submit" class="nav-link btn btn-link" style="border: none; background: none; color: inherit; cursor: pointer;">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </button>
+                        </form>
+                    </li>
                     {% else %}
-                    <a href="{{ url_for('routes.login') }}" class="outline-btn">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                        <span>Войти</span>
-                    </a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('routes.login') }}">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </a>
+                    </li>
                     {% endif %}
                 </nav>
             </div>

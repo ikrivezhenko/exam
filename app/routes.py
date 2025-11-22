@@ -280,18 +280,34 @@ def oauth_callback():
         return redirect(url_for('routes.login'))
 
 
-@routes.route('/logout')
+@routes.route('/logout', methods=['POST'])
 @login_required
 def logout():
+    """Выход из системы через POST запрос"""
+    print(f"DEBUG: Logging out user {current_user.username}")
+
+    # Выходим из Flask-Login
     logout_user()
 
-    # Очищаем сессию
+    # Полностью очищаем сессию
     session.clear()
 
-    redirect_uri = url_for('routes.login', _external=True)
-    tpu_logout_url = f"https://oauth.tpu.ru/auth/logout?redirect={redirect_uri}"
+    # Создаем response с агрессивными заголовками против кэширования
+    response = redirect(url_for('routes.login'))
 
-    return redirect(tpu_logout_url)
+    # Удаляем ВСЕ куки
+    response.set_cookie('session', '', expires=0, path='/')
+    response.set_cookie('remember_token', '', expires=0, path='/')
+
+    # Максимально агрессивные заголовки против кэширования
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = 'Mon, 01 Jan 1990 00:00:00 GMT'
+
+    flash('Вы успешно вышли из системы', 'success')
+    print("DEBUG: Logout completed successfully")
+
+    return response
 @routes.route('/static/cat.png')
 def serve_cat():
     try:
