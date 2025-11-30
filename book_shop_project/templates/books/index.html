@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Все объявления{% endblock %}
+
+{% block content %}
+<div style="background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <h2>Последние объявления о книгах</h2>
+    {% if page_obj %}
+        {% for post in page_obj %}
+        <div class="post-card">
+            <div style="display: flex; gap: 20px;">
+                {% if post.image %}
+                    <div style="flex-shrink: 0;">
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width: 150px; height: auto; border-radius: 4px;">
+                    </div>
+                {% endif %}
+                <div>
+                    <h3 style="margin-top: 0;"><a href="{% url 'books:post_detail' post.id %}">{{ post.title }}</a></h3>
+                    <p style="margin: 5px 0;"><strong>Цена:</strong> {{ post.price }} ₽</p>
+                    <p style="margin: 5px 0;"><strong>Автор:</strong> {{ post.book_author }}</p>
+                    <p style="margin: 5px 0;"><strong>Жанр:</strong> {{ post.category.title }}</p>
+                    <p style="color: grey; font-size: 0.9em;">Продавец: {{ post.author.username }} | {{ post.location.name }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% include "includes/paginator.html" %}
+    {% else %}
+        <p>Пока нет объявлений.</p>
+    {% endif %}
+</div>
+{% endblock %}

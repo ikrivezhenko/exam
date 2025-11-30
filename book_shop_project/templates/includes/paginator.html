@@ -1,0 +1,19 @@
+{% if page_obj.has_other_pages %}
+<div style="margin-top: 20px; text-align: center;">
+  <nav>
+    <ul>
+      {% if page_obj.has_previous %}
+        <a href="?page=1">Первая</a> | 
+        <a href="?page={{ page_obj.previous_page_number }}">Предыдущая</a> | 
+      {% endif %}
+      
+      <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+      
+      {% if page_obj.has_next %}
+        | <a href="?page={{ page_obj.next_page_number }}">Следующая</a> | 
+        <a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endif %}

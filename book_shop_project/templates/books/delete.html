@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Удаление{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <h2>Подтверждение удаления</h2>
+    <p>Вы уверены, что хотите удалить 
+       {% if type == 'post' %}это объявление{% else %}этот комментарий{% endif %}?
+    </p>
+    <div style="border: 1px solid #ccc; padding: 10px; margin: 20px 0; text-align: left;">
+        {% if type == 'comment' %}
+            <p><em>"{{ object.text }}"</em></p>
+        {% else %}
+            <h3>{{ object.title }}</h3>
+            <p>{{ object.text|truncatewords:20 }}</p>
+        {% endif %}
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="background-color: #d9534f; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+            Да, удалить
+        </button>
+        <a href="{% url 'books:index' %}" style="margin-left: 20px;">Отмена</a>
+    </form>
+</div>
+{% endblock %}

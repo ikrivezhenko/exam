@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<h2>{{ post.title }}</h2>
+
+{% if post.image %}
+    <img src="{{ post.image.url }}" alt="{{ post.title }}" style="max-width: 400px;">
+{% endif %}
+
+<p><strong>Автор книги:</strong> {{ post.book_author }}</p>
+<p><strong>Цена:</strong> {{ post.price }} ₽</p>
+<p><strong>Состояние:</strong> {{ post.get_condition_display }}</p>
+<p><strong>Жанр:</strong> 
+    <a href="{% url 'books:category_posts' post.category.slug %}">{{ post.category.title }}</a>
+</p>
+<p><strong>Продавец:</strong> 
+    <a href="{% url 'books:profile' post.author.username %}">{{ post.author.username }}</a>
+</p>
+<p><strong>Местоположение:</strong> {{ post.location.name|default:"Не указано" }}</p>
+<p><em>Опубликовано: {{ post.pub_date|date:"d.m.Y H:i" }}</em></p>
+
+<hr>
+<h3>Описание</h3>
+<p>{{ post.text }}</p>
+
+{% if user == post.author %}
+    <p>
+        <a href="{% url 'books:post_edit' post.id %}">✏️ Редактировать</a> | 
+        <a href="{% url 'books:post_delete' post.id %}">🗑️ Удалить</a>
+    </p>
+{% endif %}
+
+<hr>
+<h3>Комментарии ({{ post.comments.count }})</h3>
+
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'books:add_comment' post.id %}">
+        {% csrf_token %}
+        <textarea name="text" rows="3" placeholder="Оставьте комментарий..." required style="width: 100%;"></textarea>
+        <button type="submit">Отправить</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+{% endif %}
+
+<hr>
+{% for comment in post.comments.all %}
+    <div style="border-left: 3px solid #555; padding-left: 10px; margin: 10px 0;">
+        <p><strong>{{ comment.author.username }}</strong> <em>({{ comment.created_at|date:"d.m.Y H:i" }})</em></p>
+        <p>{{ comment.text }}</p>
+        
+        {% if user == comment.author %}
+            <a href="{% url 'books:edit_comment' post.id comment.id %}">Редактировать</a> | 
+            <a href="{% url 'books:delete_comment' post.id comment.id %}">Удалить</a>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>Комментариев пока нет.</p>
+{% endfor %}
+{% endblock %}

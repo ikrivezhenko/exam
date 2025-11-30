@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль {{ profile.username }}{% endblock %}
+
+{% block content %}
+<div style="background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <h2>Профиль пользователя: {{ profile.username }}</h2>
+    <p>
+        <strong>Email:</strong> {{ profile.email|default:"Не указан" }}<br>
+        <strong>Имя:</strong> {{ profile.first_name }} {{ profile.last_name }}
+    </p>
+    {% if user == profile %}
+        <div style="margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
+            <a href="{% url 'books:profile_edit' %}">✏️ Редактировать профиль</a> | 
+            <a href="{% url 'password_change' %}">🔒 Изменить пароль</a>
+        </div>
+    {% endif %}
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+    <h3>Объявления пользователя</h3>
+    {% if page_obj %}
+        {% for post in page_obj %}
+        <div class="post-card">
+            <div style="display: flex; gap: 20px;">
+                {% if post.image %}
+                    <div style="flex-shrink: 0;">
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width: 120px; height: auto; border-radius: 4px;">
+                    </div>
+                {% endif %}
+                <div style="flex-grow: 1;">
+                    <h3 style="margin-top: 0;"><a href="{% url 'books:post_detail' post.id %}">{{ post.title }}</a></h3>
+                    <p style="margin: 5px 0;"><strong>Цена:</strong> {{ post.price }} ₽</p>
+                    <p style="margin: 5px 0;">💬 Комментариев: {{ post.comments.count }}</p>
+                    {% if not post.is_published %}
+                        <p style="color: red; font-weight: bold;">🚫 Снято с публикации</p>
+                    {% elif post.pub_date > now %}
+                        <p style="color: orange; font-weight: bold;">⏳ Отложенная публикация ({{ post.pub_date|date:"d.m.Y H:i" }})</p>
+                    {% else %}
+                         <p style="color: green; font-size: 0.9em;">✅ Опубликовано</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% include "includes/paginator.html" %}
+    {% else %}
+        <p>У пользователя пока нет объявлений.</p>
+    {% endif %}
+</div>
+{% endblock %}

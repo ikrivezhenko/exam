@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать комментарий{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <h2>Редактирование комментария</h2>
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            <label>Ваш комментарий:</label><br>
+            {{ form.text }}
+        </p>
+        <button type="submit">Сохранить изменения</button>
+    </form>
+</div>
+{% endblock %}

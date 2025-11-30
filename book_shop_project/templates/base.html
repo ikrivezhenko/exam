@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Книжный магазин{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        nav {
+            background-color: #555;
+            overflow: hidden;
+        }
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            margin-top: 20px;
+        }
+        .post-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .post-card img {
+            max-width: 200px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📚 Книжный магазин</h1>
+    </header>
+    <nav>
+        <a href="{% url 'books:index' %}">Главная</a>
+        <a href="{% url 'pages:about' %}">О нас</a>
+        <a href="{% url 'pages:rules' %}">Правила</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'books:profile' user.username %}">Мой профиль</a>
+            <a href="{% url 'books:post_create' %}">Добавить книгу</a>
+            <a href="{% url 'logout' %}" style="float: right;">Выйти ({{ user.username }})</a>
+        {% else %}
+            <a href="{% url 'login' %}" style="float: right;">Войти</a>
+        {% endif %}
+    </nav>
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+    <footer>
+        <p>&copy; 2025 Книжный магазин. Все права защищены.</p>
+    </footer>
+</body>
+</html>

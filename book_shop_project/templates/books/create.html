@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if is_edit %}Редактировать книгу{% else %}Добавить книгу{% endif %}
+{% endblock %}
+
+{% block content %}
+  <div style="max-width: 600px; margin: 0 auto;">
+    <h2>{% if is_edit %}Редактирование объявления{% else %}Новое объявление{% endif %}</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+        <div style="margin-bottom: 15px;">
+            <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label>
+            <br>
+            {{ field }}
+            {% if field.help_text %}
+              <br><small style="color: grey;">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+              <div style="color: red;">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit">
+        {% if is_edit %}Сохранить изменения{% else %}Опубликовать{% endif %}
+      </button>
+    </form>
+  </div>
+{% endblock %}
